@@ -1,0 +1,196 @@
+<scroll-view class="page" scroll-y type="list" scroll-into-view="{{scrollTarget}}" scroll-with-animation>
+  <view class="hero">
+    <view class="hero-copy">
+      <text class="eyebrow">Article AI Risk</text>
+      <text class="title">AI 文章概率检测</text>
+      <text class="subtitle">基于语言节奏、模板表达、细节密度和段落风险的辅助评估工具。</text>
+    </view>
+    <view class="hero-meter">
+      <text class="meter-value">{{result ? result.score : '--'}}%</text>
+      <text class="meter-label">{{result ? result.riskLevel : '等待检测'}}</text>
+    </view>
+  </view>
+
+  <view class="toolbar">
+    <picker mode="selector" range="{{articleTypes}}" value="{{typeIndex}}" bindchange="onTypeChange">
+      <view class="picker">
+        <text class="picker-label">文本类型</text>
+        <text class="picker-value">{{articleTypes[typeIndex]}}</text>
+      </view>
+    </picker>
+    <view class="toolbar-actions">
+      <button class="ghost-btn" size="mini" bindtap="useSample">示例</button>
+      <button class="ghost-btn" size="mini" bindtap="clearText">清空</button>
+    </view>
+  </view>
+
+  <view id="article-editor" class="input-panel">
+    <textarea
+      class="article-input"
+      value="{{articleText}}"
+      maxlength="{{maxLength}}"
+      placeholder="粘贴需要检测的文章，建议不少于 300 字。"
+      bindinput="onInput"
+      auto-height="{{false}}"
+    />
+    <view class="input-footer">
+      <text>{{articleText.length}} / {{maxLength}} 字</text>
+      <button class="primary-btn" loading="{{analyzing}}" bindtap="analyze">{{hasDetected ? '重新检测' : '开始检测'}}</button>
+    </view>
+  </view>
+
+  <view wx:if="{{selectedParagraphText}}" class="selected-paragraph-panel">
+    <view class="selected-title">当前定位：第 {{selectedParagraphIndex}} 段</view>
+    <text class="selected-text">{{selectedParagraphText}}</text>
+  </view>
+
+  <view class="action-row top-action-row">
+    <button class="rewrite-btn" loading="{{humanizing}}" bindtap="reduceAiFlavor">降低AI味</button>
+    <button class="copy-btn" bindtap="copyReport">复制报告</button>
+  </view>
+
+  <view class="reference-panel">
+    <view class="panel-head">
+      <view>
+        <text class="panel-title">参考文章风格</text>
+        <text class="panel-subtitle">粘贴你的历史文章，改写时会参考它的框架、句式和用语。</text>
+      </view>
+      <button class="tiny-btn" size="mini" bindtap="clearReference">清空</button>
+    </view>
+
+    <textarea
+      class="reference-input"
+      value="{{referenceText}}"
+      maxlength="{{maxLength}}"
+      placeholder="可选：粘贴一篇你自己的文章，建议不少于 300 字。"
+      bindinput="onReferenceInput"
+      auto-height="{{false}}"
+    />
+
+    <view wx:if="{{styleProfile}}" class="style-profile">
+      <view class="style-main">
+        <text>{{styleProfile.summary}}</text>
+        <text>{{styleProfile.length}} 字参考样本</text>
+      </view>
+      <view class="style-tags">
+        <text wx:for="{{styleProfile.frequentWords}}" wx:key="*this">{{item}}</text>
+      </view>
+    </view>
+  </view>
+
+  <view wx:if="{{result}}" class="result-area">
+    <view class="summary {{result.riskClass}}">
+      <view>
+        <text class="summary-label">AI 生成概率</text>
+        <text class="summary-score">{{result.score}}%</text>
+      </view>
+      <view class="summary-meta">
+        <text>{{result.riskLevel}}</text>
+        <text>置信度 {{result.confidence}}</text>
+      </view>
+    </view>
+
+    <view class="stats-grid">
+      <view class="stat-item">
+        <text class="stat-value">{{result.wordCount}}</text>
+        <text class="stat-label">字数</text>
+      </view>
+      <view class="stat-item">
+        <text class="stat-value">{{result.paragraphCount}}</text>
+        <text class="stat-label">段落</text>
+      </view>
+      <view class="stat-item">
+        <text class="stat-value">{{result.sentenceCount}}</text>
+        <text class="stat-label">句子</text>
+      </view>
+      <view class="stat-item">
+        <text class="stat-value">{{result.aiFlavorHits}}</text>
+        <text class="stat-label">AI味句式</text>
+      </view>
+    </view>
+
+    <view class="section">
+      <view class="section-title">判断依据</view>
+      <view class="reason" wx:for="{{result.reasons}}" wx:key="*this">
+        <text class="dot"></text>
+        <text>{{item}}</text>
+      </view>
+    </view>
+
+    <view class="section">
+      <view class="section-title">段落热力图</view>
+      <view class="section-hint">已按风险从高到低排序；同风险按原文顺序排列。点击段落可定位到输入框。</view>
+      <view
+        class="paragraph-card {{item.riskClass}} {{item.selected ? 'selected' : ''}}"
+        wx:for="{{result.paragraphs}}"
+        wx:key="index"
+        data-start="{{item.start}}"
+        data-end="{{item.end}}"
+        data-index="{{item.index}}"
+        bindtap="locateParagraph"
+      >
+        <view class="paragraph-head">
+          <text>第 {{item.index}} 段</text>
+          <text>{{item.score}}% · {{item.risk}}风险</text>
+        </view>
+        <text class="paragraph-preview">{{item.preview}}</text>
+        <view class="paragraph-reasons">
+          <text wx:for="{{item.reasons}}" wx:key="*this">{{item}}</text>
+        </view>
+      </view>
+    </view>
+
+    <view class="section">
+      <view class="section-title">复核建议</view>
+      <view class="suggestion" wx:for="{{result.suggestions}}" wx:key="*this">{{item}}</view>
+    </view>
+
+    <view wx:if="{{humanizedText}}" class="section rewrite-section">
+      <view class="rewrite-head">
+        <view>
+          <view class="section-title">{{styleProfile ? '参考风格改写版' : '去 AI 味版本'}}</view>
+          <text class="rewrite-score">AI 率 {{result.score}}% → {{humanizedResult.score}}%</text>
+        </view>
+        <view class="rewrite-head-actions">
+          <text class="rewrite-badge">{{humanizedResult.riskLevel}}</text>
+          <button class="copy-rewrite-btn" size="mini" bindtap="copyHumanizedText">复制文章</button>
+        </view>
+      </view>
+
+      <view class="change-list">
+        <text wx:for="{{humanizeChanges}}" wx:key="*this">{{item}}</text>
+      </view>
+
+      <view wx:if="{{qualityReport}}" class="quality-panel">
+        <view class="quality-summary">{{qualityReport.summary}}</view>
+        <view class="quality-grid">
+          <view class="quality-item" wx:for="{{qualityReport.items}}" wx:key="label">
+            <view class="quality-row">
+              <text>{{item.label}}</text>
+              <text>{{item.displayValue}}</text>
+            </view>
+            <view class="quality-status">{{item.status}}</view>
+            <view class="quality-detail">{{item.detail}}</view>
+          </view>
+        </view>
+      </view>
+
+      <textarea
+        class="rewrite-output"
+        value="{{humanizedText}}"
+        maxlength="{{maxLength}}"
+        disabled
+        auto-height="{{false}}"
+      />
+
+      <view class="rewrite-actions">
+        <button class="secondary-btn" bindtap="copyHumanizedText">复制修改后文章</button>
+        <button class="secondary-btn dark" bindtap="useHumanizedText">替换原文并复检</button>
+      </view>
+    </view>
+  </view>
+
+  <view class="notice">
+    <text>检测结果仅用于辅助判断。短文本、强模板公文、被深度改写的内容都可能出现误判。</text>
+  </view>
+</scroll-view>
