@@ -1,0 +1,6 @@
+<scroll-view class="safe-page" scroll-y type="list">
+  <view class="nav-bar"><button class="nav-icon" bindtap="goBack">‹</button><text class="nav-title">历史记录</text><view class="nav-actions"><button class="nav-icon small" bindtap="goHome">⌂</button><button class="edit" bindtap="clearHistory">编辑</button></view></view>
+  <view class="history-tabs"><view wx:for="{{tabs}}" wx:key="key" data-key="{{item.key}}" bindtap="switchTab" class="history-tab {{tab === item.key ? 'active' : ''}}">{{item.name}}</view></view>
+  <view wx:if="{{records.length}}"><view wx:for="{{records}}" wx:key="id" data-index="{{index}}" bindtap="openRecord" class="card record-card"><view class="doc-icon">▤</view><view class="record-copy"><text class="record-title">{{item.title}}</text><text class="record-meta">字数：{{item.wordCount}}　{{item.time}}</text></view><view class="record-tags"><text class="status {{item.type}}">{{item.status}}</text><text class="score">AI {{item.afterScore || item.score}}%</text></view></view></view>
+  <view wx:else class="card empty-state"><text class="empty-title">还没有历史记录</text><text class="empty-desc">完成检测或优化后会自动保存在这里。</text></view>
+</scroll-view>

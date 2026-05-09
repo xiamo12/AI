@@ -1,0 +1,14 @@
+.setting-section { margin-top: 24rpx; }
+.help { color: #13a86d; font-size: 23rpx; }
+.intensity-card { margin-top: 18rpx; padding: 24rpx; display: flex; align-items: center; justify-content: space-between; }
+.intensity-card.active { border-color: #13a86d; background: #f0fbf6; }
+.intensity-title { display: block; color: #102733; font-size: 28rpx; font-weight: 800; }
+.intensity-desc { display: block; margin-top: 8rpx; color: #758698; font-size: 23rpx; line-height: 1.35; }
+.check { width: 38rpx; height: 38rpx; border: 1rpx solid #cbd6df; border-radius: 50%; color: #075f73; line-height: 38rpx; text-align: center; }
+.scene-grid { margin-top: 20rpx; display: grid; grid-template-columns: repeat(3, 1fr); gap: 18rpx; }
+.scene-item { height: 112rpx; border: 1rpx solid #e4ebf1; border-radius: 18rpx; background: #fff; color: #405266; font-size: 23rpx; font-weight: 700; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8rpx; }
+.scene-item.active { border-color: #13a86d; background: #f0fbf6; color: #075f73; }
+.options-card { margin-top: 28rpx; padding: 8rpx 24rpx; }
+.option-row { min-height: 86rpx; display: flex; align-items: center; justify-content: space-between; color: #102733; font-size: 28rpx; font-weight: 700; }
+.primary-btn { margin-top: 30rpx; }
+.tip { display: block; margin-top: 16rpx; color: #9aa5b1; font-size: 23rpx; text-align: center; }

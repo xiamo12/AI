@@ -1,0 +1,60 @@
+<scroll-view class="safe-page" scroll-y type="list">
+  <view class="nav-bar">
+    <button class="nav-icon" bindtap="goBack">‹</button>
+    <text class="nav-title">检测结果</text>
+    <view class="nav-actions">
+      <button class="nav-icon small" bindtap="copyReport">⇧</button>
+      <button class="nav-icon small" bindtap="goHome">⌂</button>
+    </view>
+  </view>
+
+  <view wx:if="{{analysis}}">
+    <view class="score-card">
+      <view class="gauge-wrap {{analysis.riskClass}}">
+        <view class="gauge-ring" style="background: conic-gradient({{gaugeColor}} {{analysis.score}}%, #eef2f5 0);">
+          <view class="gauge-core">
+            <text class="score">{{analysis.score}}%</text>
+            <text class="score-label">{{analysis.riskLevel}}</text>
+          </view>
+        </view>
+      </view>
+      <view class="scale"><text>0%</text><text>50%</text><text>100%</text></view>
+      <view class="color-bar six"><view class="seg deep-red"></view><view class="seg red"></view><view class="seg amber"></view><view class="seg lime"></view><view class="seg green"></view><view class="seg pale"></view></view>
+      <view class="legend six">
+        <text class="{{analysis.riskText === '极高频' ? 'active' : ''}}">极高频</text>
+        <text class="{{analysis.riskText === '高频' ? 'active' : ''}}">高频</text>
+        <text class="{{analysis.riskText === '一般' ? 'active' : ''}}">一般</text>
+        <text class="{{analysis.riskText === '较低' ? 'active' : ''}}">较低</text>
+        <text class="{{analysis.riskText === '低' ? 'active' : ''}}">低</text>
+        <text class="{{analysis.riskText === '极低' ? 'active' : ''}}">极低</text>
+      </view>
+    </view>
+
+    <view class="card analysis-card">
+      <view class="section-line">
+        <text class="section-title">AI痕迹分析</text>
+        <text class="muted">共{{analysis.sourceAnalysis.length}}项问题</text>
+      </view>
+      <view wx:for="{{analysis.sourceAnalysis}}" wx:key="title" class="source-row">
+        <view class="source-icon {{item.riskClass}}">{{index + 1}}</view>
+        <view class="source-copy">
+          <text class="source-title">{{item.title}}</text>
+          <text class="source-desc">{{item.desc}}</text>
+        </view>
+        <text class="level {{item.riskClass}}">{{item.riskClass === 'high' ? '高' : item.riskClass === 'medium' ? '中' : '低'}}</text>
+      </view>
+    </view>
+
+    <button wx:if="{{canOptimize}}" class="primary-btn" bindtap="goOptimize">一键去AI味</button>
+    <view wx:else class="congrats-card">恭喜你！无需修改</view>
+    <view class="result-actions">
+      <button class="ghost-btn {{canViewIssues ? '' : 'disabled'}}" disabled="{{!canViewIssues}}" bindtap="goIssues">查看问题句子</button>
+      <button class="ghost-btn" bindtap="recheck">重新检测</button>
+    </view>
+  </view>
+
+  <view wx:else class="card empty-state">
+    <text class="empty-title">暂无检测结果</text>
+    <text class="empty-desc">请先回到首页输入文章。</text>
+  </view>
+</scroll-view>

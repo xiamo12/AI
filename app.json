@@ -1,12 +1,53 @@
 {
   "pages": [
     "pages/index/index",
+    "pages/result/result",
+    "pages/issues/issues",
+    "pages/optimize-settings/optimize-settings",
+    "pages/optimize-result/optimize-result",
+    "pages/history/history",
+    "pages/templates/templates",
+    "pages/profile/profile",
     "pages/logs/logs"
   ],
   "window": {
     "navigationBarTextStyle": "black",
-    "navigationBarTitleText": "AI文章检测",
-    "navigationBarBackgroundColor": "#ffffff"
+    "navigationBarTitleText": "阅检AI助手",
+    "navigationBarBackgroundColor": "#f7f9fb",
+    "backgroundColor": "#f7f9fb"
+  },
+  "tabBar": {
+    "color": "#7a8797",
+    "selectedColor": "#075f73",
+    "backgroundColor": "#ffffff",
+    "borderStyle": "white",
+    "list": [
+      {
+        "pagePath": "pages/index/index",
+        "text": "首页",
+        "iconPath": "assets/tab/home.png",
+        "selectedIconPath": "assets/tab/home-active.png"
+      },
+      {
+        "pagePath": "pages/history/history",
+        "text": "记录",
+        "iconPath": "assets/tab/history.png",
+        "selectedIconPath": "assets/tab/history-active.png"
+      },
+      {
+        "pagePath": "pages/templates/templates",
+        "text": "模板",
+        "iconPath": "assets/tab/template.png",
+        "selectedIconPath": "assets/tab/template-active.png"
+      },
+      {
+        "pagePath": "pages/profile/profile",
+        "text": "我的",
+        "iconPath": "assets/tab/profile.png",
+        "selectedIconPath": "assets/tab/profile-active.png"
+      }
+    ],
+    "custom": true
   },
   "style": "v2",
   "componentFramework": "glass-easel",

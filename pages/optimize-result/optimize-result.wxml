@@ -1,0 +1,25 @@
+<scroll-view class="safe-page" scroll-y type="list">
+  <view class="nav-bar"><button class="nav-icon" bindtap="goBack">‹</button><text class="nav-title">优化完成</text><button class="nav-icon" bindtap="goHome">⌂</button></view>
+  <view wx:if="{{optimize}}">
+    <view class="done-card"><text class="done-title">AI痕迹已降低 🎉</text><view class="compare-row"><view class="score-box before"><text>优化前</text><text>{{optimize.before.score}}%</text></view><text class="arrow">→</text><view class="score-box after"><text>优化后</text><text>{{optimize.after.score}}%</text></view></view><text class="down">降低 {{dropScore}}% ↓</text><text wx:if="{{canContinue}}" class="continue-tip">当前仍高于5%，可继续点击“继续优化”再次修改</text></view>
+    <view class="tabs"><view data-tab="diff" bindtap="switchTab" class="tab {{tab === 'diff' ? 'active' : ''}}">修改对照</view><view data-tab="optimized" bindtap="switchTab" class="tab {{tab === 'optimized' ? 'active' : ''}}">优化后内容</view><view data-tab="original" bindtap="switchTab" class="tab {{tab === 'original' ? 'active' : ''}}">原文</view></view>
+
+    <view wx:if="{{tab === 'diff'}}" class="card diff-card">
+      <view wx:for="{{optimize.diff}}" wx:key="index" class="diff-block {{item.changed ? 'changed' : ''}}">
+        <text class="diff-index">第{{item.index}}段</text>
+        <view wx:for="{{item.fragments}}" wx:for-item="part" wx:key="id" class="diff-fragment {{part.changed ? 'changed' : 'same'}}">
+          <block wx:if="{{part.changed}}">
+            <text wx:if="{{part.before}}" class="diff-before">{{part.before}}</text>
+            <text wx:if="{{part.after}}" class="diff-after">{{part.after}}</text>
+          </block>
+          <text wx:else class="diff-same">{{part.after || part.before}}</text>
+        </view>
+      </view>
+      <view class="diff-legend"><text class="legend-before">红色删除线：原文</text><text class="legend-after">绿色：改写后</text></view>
+    </view>
+
+    <view wx:else class="card content-card"><text class="content-text">{{tab === 'optimized' ? optimize.optimizedText : optimize.original}}</text><view class="content-meta"><text>字数：{{optimize.after.wordCount}}</text><button bindtap="copyOptimized">复制</button></view></view>
+    <view class="card quality-card"><text class="section-title">复检结果</text><view wx:for="{{optimize.qualityReport.items}}" wx:key="label" class="quality-row"><view><text class="quality-label">{{item.label}}</text><text class="quality-detail">{{item.detail}}</text></view><text class="quality-status">{{item.status}}</text></view></view>
+    <view class="bottom-actions"><button class="ghost-btn" bindtap="copyOptimized">复制全文</button><button class="ghost-btn" bindtap="recheckOptimized">再次检测</button><button class="ghost-btn {{canContinue ? 'hot' : ''}}" bindtap="continueOptimize">继续优化</button><button class="ghost-btn" bindtap="saveRecord">保存记录</button></view>
+  </view>
+</scroll-view>

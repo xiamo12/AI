@@ -1,0 +1,13 @@
+.filter-tabs { position: sticky; top: 0; z-index: 2; padding: 14rpx 0 20rpx; background: #f7f9fb; display: flex; gap: 18rpx; }
+.filter-tab { height: 58rpx; padding: 0 20rpx; border-radius: 999rpx; color: #617083; font-size: 24rpx; font-weight: 700; line-height: 58rpx; }
+.filter-tab.active { background: #075f73; color: #fff; }
+.issue-card { margin-bottom: 24rpx; padding: 26rpx; }
+.issue-head { display: flex; align-items: center; justify-content: space-between; }
+.badge { height: 42rpx; padding: 0 16rpx; border-radius: 10rpx; font-size: 22rpx; font-weight: 800; line-height: 42rpx; }
+.badge.high { background: #fff0ed; color: #ef4444; } .badge.medium { background: #fff7e9; color: #f59e0b; } .badge.low { background: #eaf8f1; color: #13a86d; }
+.similar { color: #758698; font-size: 23rpx; }
+.issue-text { display: block; margin-top: 28rpx; color: #101b26; font-size: 30rpx; font-weight: 800; line-height: 1.6; }
+.issue-line { margin-top: 18rpx; color: #2d4254; font-size: 25rpx; line-height: 1.55; }
+.issue-line text { color: #075f73; font-weight: 800; }
+.example-box { margin-top: 22rpx; padding: 22rpx; border-radius: 14rpx; background: #f5f7f9; color: #25394a; font-size: 25rpx; line-height: 1.65; }
+.example-title { display: block; margin-bottom: 8rpx; color: #102733; font-weight: 800; }

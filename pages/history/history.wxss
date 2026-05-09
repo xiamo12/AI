@@ -1,0 +1,13 @@
+.edit { color: #6f7d8e; font-size: 25rpx; line-height: 64rpx; }
+.history-tabs { margin: 14rpx 0 24rpx; display: grid; grid-template-columns: repeat(3, 1fr); border-bottom: 1rpx solid #e5ecf2; }
+.history-tab { height: 76rpx; color: #6d7b8e; font-size: 26rpx; font-weight: 700; line-height: 76rpx; text-align: center; }
+.history-tab.active { color: #075f73; border-bottom: 4rpx solid #13a86d; }
+.record-card { margin-bottom: 20rpx; padding: 22rpx; display: flex; align-items: center; gap: 18rpx; }
+.doc-icon { width: 72rpx; height: 72rpx; border-radius: 16rpx; background: #eaf8f7; color: #075f73; font-size: 34rpx; line-height: 72rpx; text-align: center; }
+.record-copy { flex: 1; min-width: 0; }
+.record-title { display: block; color: #102733; font-size: 28rpx; font-weight: 800; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.record-meta { display: block; margin-top: 10rpx; color: #7f8b9a; font-size: 22rpx; }
+.record-tags { display: flex; flex-direction: column; align-items: flex-end; gap: 8rpx; }
+.status, .score { height: 40rpx; padding: 0 14rpx; border-radius: 10rpx; font-size: 21rpx; font-weight: 800; line-height: 40rpx; }
+.status.detect { background: #eaf2ff; color: #0b5fff; } .status.optimize { background: #eaf8f1; color: #13a86d; }
+.score { background: #eef3f7; color: #075f73; }
