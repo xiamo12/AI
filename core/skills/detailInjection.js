@@ -60,7 +60,7 @@ function apply(sentence, analysis = {}, context = {}) {
   }
 
   if (/成长|自律|阅读|学习/.test(text)) {
-    return ensureEnd(`${detail}，这件事就变得具体了：少讲口号，多给自己留一点真的能动手的时间`)
+    return ensureEnd(`${text.replace(/[。！？!?]$/, '')}，${detail}，这件事就变得具体了：少讲口号，多给自己留一点真的能动手的时间`)
   }
 
   if (/关系|拒绝|冷漠|消耗/.test(text)) {

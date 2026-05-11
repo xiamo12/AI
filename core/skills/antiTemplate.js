@@ -79,7 +79,7 @@ function apply(sentence) {
     .replace(/不知不觉中?[，,]?/g, '慢慢发现，')
 
   if (/真正[^。！？；;]{0,18}的人/.test(text)) {
-    text = text.replace(/真正[^，。！？；;]{0,18}的人/g, '那些能把事情做久的人')
+    text = text.replace(/真正[^，。！？；;]{0,18}的人/g, '能把事情做久的人')
   }
 
   return ensureEnd(text)
