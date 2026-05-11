@@ -1,1 +1,18 @@
-.profile-card { margin-top: 22rpx; padding: 28rpx; display: flex; align-items: center; gap: 20rpx; }.avatar { width: 88rpx; height: 88rpx; border-radius: 24rpx; background: linear-gradient(145deg,#075f73,#13a86d); color: #fff; font-size: 30rpx; font-weight: 900; line-height: 88rpx; text-align: center; }.name { display: block; color: #102733; font-size: 31rpx; font-weight: 900; }.desc { display: block; margin-top: 8rpx; color: #7f8b9a; font-size: 23rpx; }.stats { margin-top: 22rpx; display: grid; grid-template-columns: 1fr 1fr; gap: 18rpx; }.stat { padding: 28rpx; text-align: center; }.stat text:first-child { display: block; color: #075f73; font-size: 46rpx; font-weight: 900; }.stat text:last-child { display: block; margin-top: 8rpx; color: #7f8b9a; font-size: 23rpx; }.about { margin-top: 22rpx; padding: 28rpx; }
+.profile-card { margin-top: 22rpx; padding: 28rpx; display: flex; align-items: center; gap: 20rpx; }
+.avatar { width: 88rpx; height: 88rpx; border-radius: 24rpx; background: linear-gradient(145deg,#075f73,#13a86d); color: #fff; font-size: 30rpx; font-weight: 900; line-height: 88rpx; text-align: center; }
+.name { display: block; color: #102733; font-size: 31rpx; font-weight: 900; }
+.desc { display: block; margin-top: 8rpx; color: #7f8b9a; font-size: 23rpx; }
+.stats { margin-top: 22rpx; display: grid; grid-template-columns: 1fr 1fr; gap: 18rpx; }
+.stat { padding: 28rpx; text-align: center; }
+.stat text:first-child { display: block; color: #075f73; font-size: 46rpx; font-weight: 900; }
+.stat text:last-child { display: block; margin-top: 8rpx; color: #7f8b9a; font-size: 23rpx; }
+.about, .deepseek-card { margin-top: 22rpx; padding: 28rpx; }
+.card-row { display: flex; justify-content: space-between; align-items: center; gap: 20rpx; }
+.form-field { margin-top: 24rpx; }
+.field-label { display: block; color: #102733; font-size: 24rpx; font-weight: 800; margin-bottom: 12rpx; }
+.key-input, .picker-value { height: 82rpx; border-radius: 18rpx; background: #f6f8fa; border: 1rpx solid #dfe7eb; padding: 0 22rpx; color: #102733; font-size: 25rpx; line-height: 82rpx; }
+.field-hint { display: block; margin-top: 10rpx; color: #7f8b9a; font-size: 22rpx; }
+.setting-actions { margin-top: 26rpx; display: grid; grid-template-columns: 1fr 160rpx; gap: 16rpx; }
+.save-btn, .clear-btn { height: 84rpx; border-radius: 20rpx; font-size: 26rpx; font-weight: 800; line-height: 84rpx; }
+.save-btn { background: linear-gradient(135deg,#075f73,#13a86d); color: #fff; }
+.clear-btn { background: #f6f8fa; color: #6c7886; border: 1rpx solid #dfe7eb; }

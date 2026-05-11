@@ -23,7 +23,7 @@ function pickGrain(context = {}) {
   context.usedGrains = context.usedGrains || []
   let available = GRAINS.filter((g) => !context.usedGrains.includes(g))
   if (available.length === 0) {
-    context.usedGrains = []
+    context.usedGrains.length = 0
     available = GRAINS
   }
   const idx = Math.floor(Math.random() * available.length)

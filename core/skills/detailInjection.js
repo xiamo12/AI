@@ -26,7 +26,7 @@ function pickDetail(context = {}) {
   context.usedDetails = context.usedDetails || []
   let available = list.filter((d) => !context.usedDetails.includes(d))
   if (available.length === 0) {
-    context.usedDetails = []
+    context.usedDetails.length = 0
     available = list
   }
   const idx = Math.floor(Math.random() * available.length)

@@ -1,4 +1,4 @@
-const { STORAGE_KEYS, analyzeArticle, humanizeArticle, evaluateRewrite, buildRewriteDiff, buildHistoryRecord, saveHistory, normalizeText } = require('../../utils/aiTextEngine')
+const { STORAGE_KEYS, analyzeArticle, humanizeArticleAsync, evaluateRewrite, buildRewriteDiff, buildHistoryRecord, saveHistory, normalizeText } = require('../../utils/aiTextEngine')
 
 function getMeaningText(text) {
   return normalizeText(text)
@@ -46,64 +46,70 @@ Page({
   toggleStructure(event) { this.setData({ preserveStructure: event.detail.value }) },
   goBack() { wx.navigateBack() },
   goHome() { wx.switchTab({ url: '/pages/index/index' }) },
-  startOptimize() {
+  async startOptimize() {
     const analysis = this.data.analysis
     if (!analysis || !analysis.text) { wx.showToast({ title: '请先输入文章', icon: 'none' }); return }
     this.setData({ busy: true })
-    const options = {
-      intensity: this.data.intensity,
-      scene: this.data.scene,
-      preserveMeaning: this.data.preserveMeaning,
-      preserveStructure: this.data.preserveStructure,
-      referenceText: analysis.referenceText || '',
-      articleType: this.data.scene,
-      pass: Number(analysis.optimizeRound || 0) + 1,
-      forceChange: Number(analysis.score || 0) > 5,
-    }
-    const before = analyzeArticle(analysis.text, options)
-    if (before.score < 5) {
+    try {
+      const options = {
+        intensity: this.data.intensity,
+        scene: this.data.scene,
+        preserveMeaning: this.data.preserveMeaning,
+        preserveStructure: this.data.preserveStructure,
+        referenceText: analysis.referenceText || '',
+        articleType: this.data.scene,
+        pass: Number(analysis.optimizeRound || 0) + 1,
+        forceChange: Number(analysis.score || 0) > 5,
+      }
+      const before = analyzeArticle(analysis.text, options)
+      if (before.score < 5) {
+        wx.showToast({ title: '没有可以优化的内容', icon: 'none' })
+        return
+      }
+      let best = null
+      const firstPass = options.pass
+      for (let offset = 0; offset < 4; offset += 1) {
+        const candidateOptions = { ...options, pass: firstPass + offset, forceChange: Number(before.score || 0) > 5 }
+        const rewritten = await humanizeArticleAsync(analysis.text, candidateOptions)
+        const after = analyzeArticle(rewritten.text, candidateOptions)
+        const diff = buildRewriteDiff(analysis.text, rewritten.text)
+        const changed = hasSubstantiveContentChange(analysis.text, rewritten.text) && diff.some((block) => block.changedFragments && block.changedFragments.length)
+        const candidate = { rewritten, after, options: candidateOptions, changed, diff }
+        if (changed && (!best || after.score < best.after.score || (after.score === best.after.score && candidateOptions.pass > best.options.pass))) best = candidate
+        if (changed && rewritten.provider === 'deepseek') break
+        if (changed && after.score < before.score) break
+      }
+      if (!best) {
+        wx.showToast({ title: '没有可以优化的内容', icon: 'none' })
+        return
+      }
+      const quality = evaluateRewrite(analysis.text, best.rewritten.text, best.options)
+      quality.after.referenceText = analysis.referenceText || ''
+      quality.after.styleProfile = analysis.styleProfile || null
+      quality.after.optimizeRound = best.options.pass
+      const originalText = analysis.originalText || analysis.text
+      quality.after.originalText = originalText
+      const optimize = {
+        original: originalText,
+        currentInputText: analysis.text,
+        optimizedText: best.rewritten.text,
+        diff: buildRewriteDiff(originalText, best.rewritten.text),
+        before,
+        after: quality.after,
+        qualityReport: quality,
+        options: best.options,
+        styleProfile: best.rewritten.styleProfile,
+        provider: best.rewritten.provider || 'local',
+        createdAt: Date.now(),
+      }
+      wx.setStorageSync(STORAGE_KEYS.currentOptimize, optimize)
+      saveHistory(buildHistoryRecord({ type: 'optimize', title: analysis.title, score: quality.before.score, afterScore: quality.after.score, wordCount: quality.after.wordCount, scene: this.data.scene, analysis, optimize }))
+      wx.navigateTo({ url: '/pages/optimize-result/optimize-result' })
+    } catch (error) {
+      wx.showToast({ title: '优化失败，请稍后重试', icon: 'none' })
+      console.error('startOptimize failed:', error)
+    } finally {
       this.setData({ busy: false })
-      wx.showToast({ title: '没有可以优化的内容', icon: 'none' })
-      return
     }
-    let best = null
-    const firstPass = options.pass
-    for (let offset = 0; offset < 4; offset += 1) {
-      const candidateOptions = { ...options, pass: firstPass + offset, forceChange: Number(before.score || 0) > 5 }
-      const rewritten = humanizeArticle(analysis.text, candidateOptions)
-      const after = analyzeArticle(rewritten.text, candidateOptions)
-      const diff = buildRewriteDiff(analysis.text, rewritten.text)
-      const changed = hasSubstantiveContentChange(analysis.text, rewritten.text) && diff.some((block) => block.changedFragments && block.changedFragments.length)
-      const candidate = { rewritten, after, options: candidateOptions, changed, diff }
-      if (changed && (!best || after.score < best.after.score || (after.score === best.after.score && candidateOptions.pass > best.options.pass))) best = candidate
-      if (changed && after.score < before.score) break
-    }
-    if (!best) {
-      this.setData({ busy: false })
-      wx.showToast({ title: '没有可以优化的内容', icon: 'none' })
-      return
-    }
-    const quality = evaluateRewrite(analysis.text, best.rewritten.text, best.options)
-    quality.after.referenceText = analysis.referenceText || ''
-    quality.after.styleProfile = analysis.styleProfile || null
-    quality.after.optimizeRound = best.options.pass
-    const originalText = analysis.originalText || analysis.text
-    quality.after.originalText = originalText
-    const optimize = {
-      original: originalText,
-      currentInputText: analysis.text,
-      optimizedText: best.rewritten.text,
-      diff: buildRewriteDiff(originalText, best.rewritten.text),
-      before,
-      after: quality.after,
-      qualityReport: quality,
-      options: best.options,
-      styleProfile: best.rewritten.styleProfile,
-      createdAt: Date.now(),
-    }
-    wx.setStorageSync(STORAGE_KEYS.currentOptimize, optimize)
-    saveHistory(buildHistoryRecord({ type: 'optimize', title: analysis.title, score: quality.before.score, afterScore: quality.after.score, wordCount: quality.after.wordCount, scene: this.data.scene, analysis, optimize }))
-    this.setData({ busy: false })
-    wx.navigateTo({ url: '/pages/optimize-result/optimize-result' })
   },
 })

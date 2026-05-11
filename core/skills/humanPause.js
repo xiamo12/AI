@@ -17,7 +17,7 @@ function pickPause(context = {}) {
   context.usedPauses = context.usedPauses || []
   let available = PAUSES.filter((p) => !context.usedPauses.includes(p))
   if (available.length === 0) {
-    context.usedPauses = []
+    context.usedPauses.length = 0
     available = PAUSES
   }
   const idx = Math.floor(Math.random() * available.length)

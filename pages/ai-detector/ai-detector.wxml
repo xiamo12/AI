@@ -1,0 +1,305 @@
+<!--pages/ai-detector/ai-detector.wxml-->
+
+<view class="container">
+  <!-- 页面标题 -->
+  <view class="header">
+    <text class="title">AI文本检测器</text>
+    <text class="subtitle">本地运行，快速识别AI生成痕迹</text>
+  </view>
+
+  <!-- 服务状态 -->
+  <view class="status-bar" style="background-color: {{serviceOnline ? '#E8F5E9' : '#FFEBEE'}}">
+    <text class="status-text" style="color: {{serviceOnline ? '#4CAF50' : '#F44336'}}">
+      {{statusMessage}}
+    </text>
+  </view>
+
+  <!-- 输入框区域 -->
+  <view class="input-section">
+    <view class="input-label">输入要检测的文本</view>
+    <textarea 
+      class="input-box"
+      placeholder="粘贴或输入要检测的文本（最多50000字符）"
+      value="{{inputText}}"
+      bindinput="onInputChange"
+      maxlength="50000"
+      show-confirm-bar="false"
+      adjust-position="true"
+    />
+    <view class="char-count">
+      {{inputText.length}} / 50000
+    </view>
+  </view>
+
+  <!-- 操作按钮 -->
+  <view class="button-group">
+    <button 
+      class="btn btn-primary"
+      bindtap="detectText"
+      disabled="{{!serviceOnline || isLoading || inputText.length === 0}}"
+      loading="{{isLoading}}"
+    >
+      {{isLoading ? '检测中...' : '🔍 检测'}}
+    </button>
+    <button 
+      class="btn btn-secondary"
+      bindtap="clearAll"
+    >
+      清空
+    </button>
+  </view>
+
+  <!-- 检测结果 -->
+  <view wx:if="{{hasResult}}" class="result-section">
+    <!-- 主要结果卡片 -->
+    <view class="result-card" style="border-left: 5px solid {{getResultColor(result.overall_ai_score)}}">
+      <!-- AI概率 -->
+      <view class="result-item">
+        <text class="result-label">AI概率</text>
+        <view class="result-value-group">
+          <text 
+            class="result-score"
+            style="color: {{getResultColor(result.overall_ai_score)}}"
+          >
+            {{(result.overall_ai_score * 100).toFixed(1)}}%
+          </text>
+          <view class="progress-bar">
+            <view 
+              class="progress-fill"
+              style="width: {{result.overall_ai_score * 100}}%; background-color: {{getResultColor(result.overall_ai_score)}};"
+            />
+          </view>
+        </view>
+      </view>
+
+      <!-- 判断结果 -->
+      <view class="result-item">
+        <text class="result-label">判断结果</text>
+        <text class="result-verdict" style="color: {{getResultColor(result.overall_ai_score)}}">
+          {{getRiskDescription(result.overall_ai_score)}}
+        </text>
+      </view>
+
+      <!-- 置信度 -->
+      <view class="result-item">
+        <text class="result-label">置信度</text>
+        <text class="result-confidence">
+          {{getConfidenceDescription(result.confidence)}} ({{(result.confidence * 100).toFixed(1)}}%)
+        </text>
+      </view>
+
+      <!-- 95%置信区间 -->
+      <view class="result-item">
+        <text class="result-label">95%置信区间</text>
+        <text class="result-ci">
+          {{(result.confidence_interval.lower * 100).toFixed(1)}}% ~ {{(result.confidence_interval.upper * 100).toFixed(1)}}%
+        </text>
+      </view>
+
+      <!-- 处理时间 -->
+      <view class="result-item">
+        <text class="result-label">处理时间</text>
+        <text class="result-time">
+          {{result.processing_time_ms.toFixed(0)}}ms {{result.from_cache ? '(缓存)' : ''}}
+        </text>
+      </view>
+    </view>
+
+    <!-- 详细分析按钮 -->
+    <view class="details-toggle">
+      <button 
+        class="btn btn-text"
+        bindtap="toggleDetails"
+      >
+        {{showDetails ? '▼ 隐藏详细分析' : '▶ 显示详细分析'}}
+      </button>
+    </view>
+
+    <!-- 详细分析内容 -->
+    <view wx:if="{{showDetails}}" class="details-section">
+      <!-- 统计特征 -->
+      <view class="details-card">
+        <text class="details-title">📊 统计特征</text>
+        <view class="details-grid">
+          <view class="detail-item">
+            <text class="detail-label">熵值均值</text>
+            <text class="detail-value">{{result.metadata.statistical_features.entropy_mean.toFixed(3)}}</text>
+          </view>
+          <view class="detail-item">
+            <text class="detail-label">熵值方差</text>
+            <text class="detail-value">{{result.metadata.statistical_features.entropy_variance.toFixed(4)}}</text>
+          </view>
+          <view class="detail-item">
+            <text class="detail-label">突发系数</text>
+            <text class="detail-value">{{result.metadata.statistical_features.burstiness.toFixed(3)}}</text>
+          </view>
+          <view class="detail-item">
+            <text class="detail-label">齐普夫分数</text>
+            <text class="detail-value">{{result.metadata.statistical_features.zipfian_score.toFixed(3)}}</text>
+          </view>
+          <view class="detail-item">
+            <text class="detail-label">词汇多样性</text>
+            <text class="detail-value">{{result.metadata.statistical_features.lexical_diversity.toFixed(3)}}</text>
+          </view>
+          <view class="detail-item">
+            <text class="detail-label">困惑度估计</text>
+            <text class="detail-value">{{result.metadata.statistical_features.perplexity_estimate.toFixed(3)}}</text>
+          </view>
+        </view>
+      </view>
+
+      <!-- 深度学习特征 -->
+      <view class="details-card">
+        <text class="details-title">🧠 深度学习特征</text>
+        <view class="details-grid">
+          <view class="detail-item">
+            <text class="detail-label">平均相似度</text>
+            <text class="detail-value">{{result.metadata.deep_learning_features.mean_coherence.toFixed(3)}}</text>
+          </view>
+          <view class="detail-item">
+            <text class="detail-label">相似度标差</text>
+            <text class="detail-value">{{result.metadata.deep_learning_features.coherence_std.toFixed(3)}}</text>
+          </view>
+          <view class="detail-item">
+            <text class="detail-label">转折平滑度</text>
+            <text class="detail-value">{{result.metadata.deep_learning_features.transition_smoothness.toFixed(3)}}</text>
+          </view>
+          <view class="detail-item">
+            <text class="detail-label">语义多样性</text>
+            <text class="detail-value">{{result.metadata.deep_learning_features.semantic_diversity.toFixed(3)}}</text>
+          </view>
+          <view class="detail-item">
+            <text class="detail-label">聚类系数</text>
+            <text class="detail-value">{{result.metadata.deep_learning_features.clustering_coefficient.toFixed(3)}}</text>
+          </view>
+          <view class="detail-item">
+            <text class="detail-label">平坦逻辑区域</text>
+            <text class="detail-value">{{result.metadata.deep_learning_features.flat_regions_detected}}</text>
+          </view>
+        </view>
+      </view>
+
+      <!-- 高风险段落 -->
+      <view wx:if="{{result.heatmap_data && result.heatmap_data.length > 0}}" class="details-card">
+        <text class="details-title">⚠️ 高风险段落 (Top {{result.heatmap_data.length}})</text>
+        <view class="heatmap-list">
+          <view 
+            wx:for="{{result.heatmap_data}}"
+            wx:key="segment_idx"
+            class="heatmap-item"
+            style="border-left: 5px solid {{getResultColor(item.risk_score)}}"
+          >
+            <view class="heatmap-header">
+              <text class="heatmap-idx">#{{item.segment_idx}}</text>
+              <text 
+                class="heatmap-risk"
+                style="color: {{getResultColor(item.risk_score)}}"
+              >
+                {{(item.risk_score * 100).toFixed(0)}}%风险
+              </text>
+            </view>
+            <text class="heatmap-text">{{item.text}}</text>
+            <view class="heatmap-tags">
+              <view 
+                wx:for="{{item.risk_types}}"
+                wx:key="*this"
+                class="tag"
+              >
+                {{item}}
+              </view>
+            </view>
+          </view>
+        </view>
+      </view>
+
+      <!-- 文本统计 -->
+      <view class="details-card">
+        <text class="details-title">📈 文本统计</text>
+        <view class="details-list">
+          <view class="list-item">
+            <text class="list-label">句子数</text>
+            <text class="list-value">{{result.metadata.n_sentences}}</text>
+          </view>
+          <view class="list-item">
+            <text class="list-label">从句数</text>
+            <text class="list-value">{{result.metadata.n_clauses}}</text>
+          </view>
+          <view class="list-item">
+            <text class="list-label">文本长度</text>
+            <text class="list-value">{{result.metadata.text_length}} 字符</text>
+          </view>
+          <view class="list-item">
+            <text class="list-label">平均句长</text>
+            <text class="list-value">{{result.metadata.avg_sentence_length.toFixed(1)}} 字</text>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 操作按钮 -->
+    <view class="result-actions">
+      <button class="btn btn-text" bindtap="copyResult">📋 复制结果</button>
+    </view>
+  </view>
+
+  <!-- 历史记录 -->
+  <view wx:if="{{history.length > 0}}" class="history-section">
+    <view class="history-header">
+      <text class="history-title">📜 检测历史</text>
+      <button 
+        class="btn-small"
+        bindtap="clearHistory"
+      >
+        清空
+      </button>
+    </view>
+    <view class="history-list">
+      <view 
+        wx:for="{{history}}"
+        wx:key="index"
+        class="history-item"
+        bindtap="detectFromHistory"
+        data-index="{{index}}"
+        style="border-left: 5px solid {{getResultColor(item.score)}}"
+      >
+        <text class="history-text">{{item.text}}</text>
+        <view class="history-info">
+          <text class="history-score" style="color: {{getResultColor(item.score)}}">
+            {{(item.score * 100).toFixed(0)}}%
+          </text>
+          <text class="history-time">
+            {{(new Date(item.timestamp)).toLocaleTimeString('zh-CN', {hour: '2-digit', minute: '2-digit'})}}
+          </text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 帮助提示 -->
+  <view class="help-section">
+    <view class="help-item">
+      <text class="help-title">🎯 检测原理</text>
+      <text class="help-text">
+        通过分析文本的统计特征（熵值、突发系数、齐普夫分布）、语义连贯度近似特征和模板句式信号来判断文本是否由AI生成。
+      </text>
+    </view>
+    <view class="help-item">
+      <text class="help-title">📊 结果解释</text>
+      <text class="help-text">
+        • AI概率 >70%：很可能是AI生成
+        • AI概率 50-70%：可能是AI生成
+        • AI概率 <50%：可能是人类写作
+        • 置信度越高，结果越可靠
+      </text>
+    </view>
+    <view class="help-item">
+      <text class="help-title">⚡ 性能提示</text>
+      <text class="help-text">
+        • 短文本检测更快（通常&lt;1秒）
+        • 长文本处理需要更多时间
+        • 检测在小程序本地完成
+        • 不需要额外启动后端服务
+      </text>
+    </view>
+  </view>
+</view>
