@@ -17,7 +17,7 @@ const SKILL_REGISTRY = {
 const STRATEGY_MAP = {
   template_expression: ['observationRewrite', 'antiTemplate', 'rhythmBreaker'],
   over_summary: ['observationRewrite', 'detailInjection'],
-  too_abstract: ['detailInjection', 'observationRewrite', 'antiTemplate'],
+  too_abstract: ['antiTemplate', 'detailInjection', 'observationRewrite'],
   too_regular: ['rhythmBreaker', 'humanPause'],
   lack_detail: ['detailInjection', 'humanPause'],
   weak_human_voice: ['humanPause', 'observationRewrite'],
