@@ -19,7 +19,7 @@ const STRATEGY_MAP = {
   over_summary: ['observationRewrite', 'detailInjection'],
   too_abstract: ['antiTemplate', 'detailInjection', 'observationRewrite'],
   too_regular: ['rhythmBreaker', 'humanPause'],
-  lack_detail: ['detailInjection', 'humanPause'],
+  lack_detail: ['antiTemplate', 'detailInjection', 'humanPause'],
   weak_human_voice: ['humanPause', 'observationRewrite'],
   emotion_flat: ['emotionalGrain', 'humanPause'],
   no_real_resistance: ['emotionalGrain', 'detailInjection'],
