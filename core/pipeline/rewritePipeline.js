@@ -270,7 +270,7 @@ function dedupIdenticalPatterns(text) {
     }
     // 然后去 PAUSES 填坑词 + 逗号
     for (const p of PAUSES) {
-      if (result.startsWith(p + ',')) {
+      if (result.startsWith(p + ',') || result.startsWith(p + '，')) {
         result = result.substring((p + ',').length)
         break
       }
@@ -324,14 +324,14 @@ function smoothTransitions(text) {
     for (const second of allPrefixes) {
       if (first === second) continue
       // 精确匹配:first,second, → first,
-      const exactPattern = new RegExp(escapeRegExp(first) + '[,,]' + escapeRegExp(second) + '[,,]', 'g')
-      result = result.replace(exactPattern, first + ',')
+      const exactPattern = new RegExp(escapeRegExp(first) + '[，,]' + escapeRegExp(second) + '[，,]', 'g')
+      result = result.replace(exactPattern, first + '，')
     }
     // 模糊匹配:仅对 KNOWN_LONG_PREFIXES 白名单生效
     for (const longPrefix of KNOWN_LONG_PREFIXES) {
       if (longPrefix === first) continue
-      const fuzzyPattern = new RegExp(escapeRegExp(first) + '[,,]' + escapeRegExp(longPrefix) + '[,,]', 'g')
-      result = result.replace(fuzzyPattern, first + ',')
+      const fuzzyPattern = new RegExp(escapeRegExp(first) + '[，,]' + escapeRegExp(longPrefix) + '[，,]', 'g')
+      result = result.replace(fuzzyPattern, first + '，')
     }
   }
 
