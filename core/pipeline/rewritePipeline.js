@@ -174,6 +174,146 @@ function mergeSentences(results) {
   return results.map((item) => item.rewritten).filter(Boolean).join('')
 }
 
+function escapeRegExp(string) {
+  return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+}
+
+/**
+ * B1 检测1：连续句式前缀去重
+ *
+ * 检测 3 句及以上连续以 PAUSES 中词开头的句子，
+ * 只保留第 1 句的前缀，移除第 2、3 句的相同前缀。
+ */
+function dedupConsecutivePrefixes(text) {
+  const PAUSES = ['其实', '后来', '有时候', '说实话', '我以前也这样']
+  const sentences = text.match(/[^。！？!?]+[。！？!?]/g)
+  if (!sentences || sentences.length < 3) return text
+
+  let changed = false
+  for (let i = 0; i <= sentences.length - 3; i++) {
+    const prefixes = []
+    let allPause = true
+    for (let j = 0; j < 3; j++) {
+      const s = sentences[i + j].trim()
+      let found = null
+      for (const p of PAUSES) {
+        if (s.startsWith(p + '，') || s.startsWith(p + ',')) {
+          found = p
+          break
+        }
+      }
+      if (found) {
+        prefixes.push({ idx: i + j, prefix: found })
+      } else {
+        allPause = false
+        break
+      }
+    }
+
+    if (allPause) {
+      for (let k = 1; k < prefixes.length; k++) {
+        const { idx, prefix } = prefixes[k]
+        sentences[idx] = sentences[idx].replace(new RegExp('^' + escapeRegExp(prefix) + '[,，]'), '')
+        changed = true
+      }
+      i += 2
+    }
+  }
+
+  return changed ? sentences.join('') : text
+}
+
+/**
+ * B1 检测2：句式雷同变体
+ *
+ * 比较相邻句子去掉句末标点后的前 4 个字符，
+ * 如果相同则判定句式雷同，去掉第 2 句的雷同开头。
+ */
+function dedupIdenticalPatterns(text) {
+  const PAUSES = ['其实', '后来', '有时候', '说实话', '我以前也这样']
+  const sentences = text.match(/[^。！？!?]+[。！？!?]/g)
+  if (!sentences || sentences.length < 2) return text
+
+  // 比较前先去掉已知填充词前缀，避免把 “后来我发现，X” 和 “后来我发现，Y” 误判为雷同
+  function stripFillers(s) {
+    let result = s.trim()
+    // 长前缀优先匹配（observationRewrite/fallbackRewrite 产生的固定模板）
+    const longPrefixes = [
+      '后来我发现，', '后来我看，', '后来我发现',
+      '放到真实生活里看，', '换到真实场景里，',
+      '更该放在心上的，是', '更该放在心上的',
+    ]
+    for (const lp of longPrefixes.sort((a, b) => b.length - a.length)) {
+      if (result.startsWith(lp)) {
+        result = result.substring(lp.length)
+        break
+      }
+    }
+    // 然后去 PAUSES 填坑词 + 逗号
+    for (const p of PAUSES) {
+      if (result.startsWith(p + '，')) {
+        result = result.substring((p + '，').length)
+        break
+      }
+    }
+    return result.trim()
+  }
+
+  let changed = false
+  for (let i = 1; i < sentences.length; i++) {
+    const prevBody = stripFillers(sentences[i - 1].replace(/[。！？!?]$/, ''))
+    const currBody = stripFillers(sentences[i].replace(/[。！？!?]$/, ''))
+
+    if (prevBody.length >= 4 && currBody.length >= 4) {
+      if (prevBody.substring(0, 4) === currBody.substring(0, 4)) {
+        const remaining = currBody.substring(4).trim()
+        if (remaining.length >= 4) {
+          sentences[i] = ensureEnd(remaining)
+          changed = true
+        }
+      }
+    }
+  }
+
+  return changed ? sentences.join('') : text
+}
+
+/**
+ * B2：跨句平滑过渡
+ *
+ * 在逐句改写结果合并后、finalPolish 前调用。
+ * 处理相邻前缀词拼接、重复标点和跨句连接词冗余。
+ */
+function smoothTransitions(text) {
+  let result = text
+
+  const PAUSES = ['其实', '后来', '有时候', '说实话', '我以前也这样']
+  const DETAIL = ['写到这里的时候', '翻评论区时', '和朋友聊起这件事时', '那天晚上', '后来再遇到类似事情时', '真正动手去做的时候']
+
+  // 1. 双前缀拼接：两个 pause/detail 词相邻出现，保留第一个
+  //    也匹配第二个前缀词后跟更多内容的情况，例如“那天晚上，后来我发现，”
+  const allPrefixes = [...PAUSES, ...DETAIL].sort((a, b) => b.length - a.length)
+  for (const first of allPrefixes) {
+    for (const second of allPrefixes) {
+      if (first === second) continue
+      // 精确匹配：first，second， → first，
+      const exactPattern = new RegExp(escapeRegExp(first) + '[,，]' + escapeRegExp(second) + '[,，]', 'g')
+      result = result.replace(exactPattern, first + '，')
+      // 放宽匹配：first，second 开头 + 更多内容 + ， → first，
+      const fuzzyPattern = new RegExp(escapeRegExp(first) + '[,，]' + escapeRegExp(second) + '[^，。]+[,，]', 'g')
+      result = result.replace(fuzzyPattern, first + '，')
+    }
+  }
+
+  // 2. 重复句号/逗号修复
+  result = result.replace(/。。+/g, '。').replace(/，，+/g, '，')
+
+  // 3. 跨句连接词冗余：句首"后来"且前句以停顿词结尾
+  result = result.replace(/([其实那])。[　\s]*后来，/g, '$1。')
+
+  return result
+}
+
 /**
  * 最终润色层。
  *
@@ -183,6 +323,11 @@ function mergeSentences(results) {
 function finalPolish(article, context = {}) {
   let text = normalizeText(article)
   text = removeMechanicalArtifacts(text)
+
+  // B1: 跨句检测
+  text = dedupConsecutivePrefixes(text)
+  text = dedupIdenticalPatterns(text)
+
   text = text
     .replace(/。\n。/g, '。\n')
     .replace(/([。！？!?])([^\n])/g, '$1$2')
@@ -236,7 +381,9 @@ function rewriteArticle(text, options = {}) {
     return mergeSentences(results)
   })
 
-  let output = finalPolish(rewrittenParagraphs.join(options.preserveStructure === false ? '\n' : '\n\n'), options)
+  let output = rewrittenParagraphs.join(options.preserveStructure === false ? '\n' : '\n\n')
+  output = smoothTransitions(output)
+  output = finalPolish(output, options)
   if (options.forceChange && !hasSubstantiveChange(normalized, output)) {
     const allSentences = splitIntoSentences(normalized)
     const targetSentence = allSentences.find((sentence) => normalizeForCompare(sentence).length > 6) || allSentences[0] || normalized
@@ -261,5 +408,6 @@ module.exports = {
   rewriteSentence,
   splitIntoSentences,
   finalPolish,
+  smoothTransitions,
   hasSubstantiveChange,
 }
