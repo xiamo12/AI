@@ -72,6 +72,7 @@ function apply(sentence) {
     .replace(/可以说[，,]?/g, '')
     .replace(/值得注意的是[，,]?/g, '有个细节我后来才注意到，')
     .replace(/综上所述[，,]?/g, '回头看，')
+    .replace(/总的来说[，,]?/g, '回头看，')
     .replace(/总而言之[，,]?/g, '说简单点，')
     .replace(/首先[，,]?/g, '一来，')
     .replace(/其次[，,]?/g, '二来，')
