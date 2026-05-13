@@ -100,10 +100,8 @@ Page({
       type: 'detect', title: analysis.title, score: analysis.score,
       wordCount: analysis.wordCount, scene: analysis.articleType, analysis,
     }))
-
-    this._initWithAnalysis(analysis)
     wx.hideLoading()
-    wx.showToast({ title: '已重新检测', icon: 'none' })
+    wx.switchTab({ url: '/pages/index/index' })
   },
 
   goBack() {
