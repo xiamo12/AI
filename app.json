@@ -3,12 +3,9 @@
     "pages/index/index",
     "pages/result/result",
     "pages/issues/issues",
-    "pages/optimize-settings/optimize-settings",
-    "pages/optimize-result/optimize-result",
     "pages/history/history",
     "pages/templates/templates",
-    "pages/profile/profile",
-    "pages/logs/logs"
+    "pages/profile/profile"
   ],
   "window": {
     "navigationBarTextStyle": "black",

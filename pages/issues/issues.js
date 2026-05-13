@@ -1,11 +1,16 @@
 const { STORAGE_KEYS } = require('../../utils/aiTextEngine')
 
 Page({
-  data: { issues: [], filteredIssues: [], filter: 'all', filters: [] },
+  data: { issues: [], filteredIssues: [], filter: 'all', filters: [], statusBarHeight: 0, loading: true },
   onShow() {
+    this.setData({
+      statusBarHeight: wx.getSystemInfoSync().statusBarHeight,
+      loading: true,
+    })
     const analysis = wx.getStorageSync(STORAGE_KEYS.currentAnalysis)
     const issues = analysis && analysis.issues ? analysis.issues : []
     this.setData({ issues }, () => this.refreshFilters())
+    this.setData({ loading: false })
   },
   refreshFilters() {
     const issues = this.data.issues

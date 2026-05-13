@@ -4,9 +4,7 @@
   "private": true,
   "description": "阅检AI助手 — AI率检测/优化/改写微信小程序",
   "scripts": {
-    "build:core": "tsc -p tsconfig.json --noEmit",
-    "build:core:emit": "tsc -p tsconfig.json",
-    "test": "node tests/test-detection.js && node tests/test-rewrite.js && node tests/test-quality.js",
+    "test": "node tests/test-detection.js",
     "lint": "echo 'lint placeholder'"
   },
   "engines": {

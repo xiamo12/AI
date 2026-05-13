@@ -8,6 +8,16 @@
 2. 核心标准：`../codex-rules/rules/detection-standard.md` 和 `../codex-rules/rules/rewriting-standard.md`
 3. 当前记忆：`../codex-rules/memory/MEMORY.md`
 
+## 多 Agent 协作
+你有 4 个协作 Agent（定义在 `../codex-rules/agents/`）：
+- **Arch Agent** (DeepSeek Reasoner) — 方案设计、trade-off 分析
+- **Review Agent** (GPT-5.5) — 代码审查
+- **UI Agent** (Claude) — WXML+WXSS 页面
+- **Hermes Agent** — 用户日常使用的 CLI Agent，负责分析、方案、实现全流程
+
+如果你被用户要求做方案设计（而非实现），先读 `agents/prompts/arch-detection.md` 或 `arch-rewriting.md`。
+如果你被要求审代码，先读 `agents/prompts/review-detection.md` 或 `review-rewriting.md`。
+
 ## 黄金守则
 1. **不编造文件和函数** —— 访问一个文件/函数前，先确认它真实存在
 2. **读再写** —— 修改前先读取完整文件内容
@@ -17,4 +27,4 @@
 
 ## 上下文管理
 - 每次对话超过 30 轮时，问用户是否要归档并开启新会话
-- 归档方式：将关键决策写入 `memory/MEMORY.md`，然后用新的简短 prompt 启动下一轮
+- 归档方式：将关键决策写入 `../codex-rules/memory/MEMORY.md`，然后用新的简短 prompt 启动下一轮

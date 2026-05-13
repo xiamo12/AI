@@ -15,39 +15,10 @@
 
   <view class="stats">
     <view class="card stat"><text>{{total}}</text><text>历史记录</text></view>
-    <view class="card stat"><text>{{optimized}}</text><text>优化完成</text></view>
-  </view>
-
-  <view class="card deepseek-card">
-    <view class="card-row">
-      <view>
-        <text class="section-title">DeepSeek 改写</text>
-        <text class="section-subtitle">开启后，“开始优化”会优先调用 DeepSeek。</text>
-      </view>
-      <switch checked="{{deepSeekEnabled}}" color="#0c7c86" bindchange="toggleDeepSeek" />
-    </view>
-
-    <view class="form-field">
-      <text class="field-label">API Key</text>
-      <input class="key-input" password value="{{deepSeekKey}}" placeholder="sk-..." bindinput="inputDeepSeekKey" />
-      <text wx:if="{{deepSeekKeyMasked}}" class="field-hint">当前：{{deepSeekKeyMasked}}</text>
-    </view>
-
-    <view class="form-field">
-      <text class="field-label">模型</text>
-      <picker mode="selector" range="{{deepSeekModels}}" bindchange="selectDeepSeekModel">
-        <view class="picker-value">{{deepSeekModel}}</view>
-      </picker>
-    </view>
-
-    <view class="setting-actions">
-      <button class="save-btn" bindtap="saveDeepSeekConfig">保存配置</button>
-      <button class="clear-btn" bindtap="clearDeepSeekConfig">清除</button>
-    </view>
   </view>
 
   <view class="card about">
     <text class="section-title">使用说明</text>
-    <text class="section-subtitle">检测结果基于本地启发式规则，用于辅助判断文章是否存在明显AI痕迹。DeepSeek Key 仅保存在当前设备。</text>
+    <text class="section-subtitle">检测结果基于本地启发式规则，用于辅助判断文章是否存在明显AI痕迹。</text>
   </view>
 </scroll-view>

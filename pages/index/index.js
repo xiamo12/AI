@@ -1,30 +1,32 @@
-const { STORAGE_KEYS, analyzeArticle, buildHistoryRecord, saveHistory, extractStyleProfile } = require('../../utils/aiTextEngine')
+const { STORAGE_KEYS, analyzeArticle, buildHistoryRecord, saveHistory } = require('../../utils/aiTextEngine')
 
 const articleTypes = [
-  { name: '通用文本', icon: '◎' },
-  { name: '公众号文章', icon: '✎' },
-  { name: '小红书笔记', icon: '✦' },
-  { name: '论文/作业', icon: '□' },
-  { name: '职场文档', icon: '▣' },
-  { name: '短视频脚本', icon: '▶' },
+  { icon: '◎', name: '通用文本', nameShort: '通用文本' },
+  { icon: '□', name: '论文/作业', nameShort: '论文/毕业' },
+  { icon: '✎', name: '公众号文章', nameShort: '公众号' },
+  { icon: '✦', name: '小红书笔记', nameShort: '小红书' },
 ]
 
 Page({
   data: {
-    tabs: ['AI检测', '去痕改写'],
-    activeTab: 'AI检测',
     articleTypes,
     typeIndex: 0,
     articleText: '',
-    referenceText: '',
-    styleProfile: null,
     maxLength: 10000,
-    hasDetected: false,
     busy: false,
   },
 
   onShow() {
     this.setTabBarSelected(0)
+    // 读取模板页传递的预设场景
+    const presetScene = wx.getStorageSync('preset_scene')
+    if (presetScene) {
+      const idx = articleTypes.findIndex((t) => t.name === presetScene)
+      if (idx >= 0) {
+        this.setData({ typeIndex: idx })
+      }
+      wx.removeStorageSync('preset_scene')
+    }
   },
 
   setTabBarSelected(index) {
@@ -33,12 +35,16 @@ Page({
     }
   },
 
-  switchTab(event) {
-    this.setData({ activeTab: event.currentTarget.dataset.tab })
+  onMore() {
+    wx.showToast({ title: '更多功能开发中', icon: 'none' })
   },
 
-  toggleMode() {
-    this.setData({ activeTab: this.data.activeTab === 'AI检测' ? '去痕改写' : 'AI检测' })
+  onMiniProgram() {
+    wx.showToast({ title: '功能开发中', icon: 'none' })
+  },
+
+  showMoreTypes() {
+    wx.showToast({ title: '更多类型开发中', icon: 'none' })
   },
 
   selectType(event) {
@@ -46,35 +52,21 @@ Page({
   },
 
   onInput(event) {
-    this.setData({ articleText: event.detail.value, hasDetected: false })
-  },
-
-  onReferenceInput(event) {
-    const referenceText = event.detail.value
-    this.setData({ referenceText, styleProfile: extractStyleProfile(referenceText) })
+    this.setData({ articleText: event.detail.value })
   },
 
   clearText() {
-    this.setData({ articleText: '', hasDetected: false })
-  },
-
-  clearReference() {
-    this.setData({ referenceText: '', styleProfile: null })
+    this.setData({ articleText: '' })
   },
 
   pasteText() {
     wx.getClipboardData({
-      success: (res) => this.setData({ articleText: res.data || '', hasDetected: false }),
+      success: (res) => this.setData({ articleText: res.data || '' }),
       fail: () => wx.showToast({ title: '读取剪贴板失败', icon: 'none' }),
     })
   },
 
-  useSample() {
-    const sample = '真正优秀的人，都有长期主义。不是远离所有人，而是靠近真正值得的人。很多时候，我们需要意识到，成长不是一蹴而就的事情，而是在每一个选择里，慢慢找到自己的节奏。'
-    this.setData({ articleText: sample, hasDetected: false })
-  },
-
-  runPrimaryAction() {
+  detectText() {
     const text = this.data.articleText.trim()
     if (!text) {
       wx.showToast({ title: '请先输入文章', icon: 'none' })
@@ -84,18 +76,9 @@ Page({
     const articleType = this.data.articleTypes[this.data.typeIndex].name
     const analysis = analyzeArticle(text, { articleType })
     analysis.originalText = text
-    analysis.referenceText = this.data.referenceText
-    analysis.styleProfile = this.data.styleProfile
     wx.setStorageSync(STORAGE_KEYS.currentAnalysis, analysis)
-
-    if (this.data.activeTab === 'AI检测') {
-      saveHistory(buildHistoryRecord({ type: 'detect', title: analysis.title, score: analysis.score, wordCount: analysis.wordCount, scene: articleType, analysis }))
-      this.setData({ busy: false, hasDetected: true })
-      wx.navigateTo({ url: '/pages/result/result' })
-      return
-    }
-
-    this.setData({ busy: false, hasDetected: true })
-    wx.navigateTo({ url: '/pages/optimize-settings/optimize-settings' })
+    saveHistory(buildHistoryRecord({ type: 'detect', title: analysis.title, score: analysis.score, wordCount: analysis.wordCount, scene: articleType, analysis }))
+    this.setData({ busy: false })
+    wx.navigateTo({ url: '/pages/result/result' })
   },
 })

@@ -1,16 +1,24 @@
 Page({
   data: {
     templates: [
-      { icon: '✎', title: '公众号文章', desc: '观点清晰，段落有层次' },
-      { icon: '✦', title: '小红书笔记', desc: '更口语，更有分享感' },
-      { icon: '□', title: '论文/作业', desc: '保持严谨，降低模板腔' },
-      { icon: '▣', title: '职场文档', desc: '表达简洁，适合汇报' },
-      { icon: '▶', title: '口播脚本', desc: '短句更多，节奏更顺' },
+      { icon: '✎', title: '公众号文章', desc: '观点清晰，段落有层次', scene: '公众号' },
+      { icon: '✦', title: '小红书笔记', desc: '更口语，更有分享感', scene: '小红书' },
+      { icon: '□', title: '论文/作业', desc: '保持严谨，降低模板腔', scene: '论文' },
+      { icon: '▣', title: '职场文档', desc: '表达简洁，适合汇报', scene: '职场' },
+      { icon: '▶', title: '口播脚本', desc: '短句更多，节奏更顺', scene: '口播' },
     ],
   },
 
   onShow() {
     this.setTabBarSelected(2)
+  },
+
+  selectTemplate(event) {
+    const scene = event.currentTarget.dataset.scene
+    if (!scene) return
+    wx.switchTab({ url: '/pages/index/index' })
+    // 通过 storage 传递预选场景，首页 onShow 时读取
+    wx.setStorageSync('preset_scene', scene)
   },
 
   goBack() {

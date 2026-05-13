@@ -1,60 +1,69 @@
-<scroll-view class="safe-page" scroll-y type="list">
-  <view class="nav-bar">
-    <button class="nav-icon" bindtap="goBack">‹</button>
-    <text class="nav-title">检测结果</text>
-    <view class="nav-actions">
-      <button class="nav-icon small" bindtap="copyReport">⇧</button>
-      <button class="nav-icon small" bindtap="goHome">⌂</button>
-    </view>
+<view class="container">
+  <!-- 加载状态 -->
+  <view wx:if="{{loading}}" class="loading-wrap">
+    <view class="loading-spinner"></view>
+    <text class="loading-text">加载中...</text>
   </view>
 
-  <view wx:if="{{analysis}}">
+  <!-- 主要内容 -->
+  <block wx:elif="{{analysis}}">
+    <!-- 返回按钮 -->
+    <view class="back-btn" style="top: calc({{statusBarHeight}}px + 12px);" bindtap="goBack">‹</view>
+
+    <!-- 顶部背景与机器人 -->
+    <view class="header-bg">
+      <image class="robot-icon" src="/assets/home/robot.png" mode="widthFix" />
+    </view>
+
+    <!-- 分数展示卡片 -->
     <view class="score-card">
-      <view class="gauge-wrap {{analysis.riskClass}}">
-        <view class="gauge-ring" style="background: conic-gradient({{gaugeColor}} {{analysis.score}}%, #eef2f5 0);">
-          <view class="gauge-core">
-            <text class="score">{{analysis.score}}%</text>
-            <text class="score-label">{{analysis.riskLevel}}</text>
+      <view class="score-num">{{analysis.score}}<text class="unit">%</text></view>
+      <view class="score-label">{{riskLabel}}</view>
+      <view class="score-desc">AI生成概率 <text class="info-icon">ⓘ</text></view>
+    </view>
+
+    <!-- 刻度进度条 -->
+    <view class="scale-container">
+      <view class="scale-bar">
+        <view class="indicator" style="left: {{indicatorLeft}};"></view>
+      </view>
+      <view class="scale-labels">
+        <block wx:for="{{scaleLabels}}" wx:key="key">
+          <text class="{{item.active ? 'active' : ''}}">{{item.label}}</text>
+        </block>
+      </view>
+    </view>
+
+    <!-- AI痕迹分析列表 -->
+    <view class="analysis-section">
+      <view class="section-title">AI痕迹分析 <text class="count">共{{displayIssues.length}}项</text></view>
+      <scroll-view class="analysis-scroll" scroll-y>
+        <view wx:for="{{displayIssues}}" wx:key="index" class="issue-item">
+          <view class="issue-icon" style="background: {{item.bgColor}}">
+            <text class="issue-num">{{index + 1}}</text>
           </view>
+          <view class="issue-content">
+            <view class="issue-name">{{item.title}}</view>
+            <view class="issue-detail">{{item.desc}}</view>
+          </view>
+          <view class="issue-tag {{item.levelClass}}">{{item.level}}</view>
         </view>
-      </view>
-      <view class="scale"><text>0%</text><text>50%</text><text>100%</text></view>
-      <view class="color-bar six"><view class="seg deep-red"></view><view class="seg red"></view><view class="seg amber"></view><view class="seg lime"></view><view class="seg green"></view><view class="seg pale"></view></view>
-      <view class="legend six">
-        <text class="{{analysis.riskText === '极高频' ? 'active' : ''}}">极高频</text>
-        <text class="{{analysis.riskText === '高频' ? 'active' : ''}}">高频</text>
-        <text class="{{analysis.riskText === '一般' ? 'active' : ''}}">一般</text>
-        <text class="{{analysis.riskText === '较低' ? 'active' : ''}}">较低</text>
-        <text class="{{analysis.riskText === '低' ? 'active' : ''}}">低</text>
-        <text class="{{analysis.riskText === '极低' ? 'active' : ''}}">极低</text>
-      </view>
+      </scroll-view>
     </view>
 
-    <view class="card analysis-card">
-      <view class="section-line">
-        <text class="section-title">AI痕迹分析</text>
-        <text class="muted">共{{analysis.sourceAnalysis.length}}项问题</text>
-      </view>
-      <view wx:for="{{analysis.sourceAnalysis}}" wx:key="title" class="source-row">
-        <view class="source-icon {{item.riskClass}}">{{index + 1}}</view>
-        <view class="source-copy">
-          <text class="source-title">{{item.title}}</text>
-          <text class="source-desc">{{item.desc}}</text>
-        </view>
-        <text class="level {{item.riskClass}}">{{item.riskClass === 'high' ? '高' : item.riskClass === 'medium' ? '中' : '低'}}</text>
-      </view>
+    <!-- 底部操作按钮 -->
+    <view class="btn-area">
+      <button class="action-btn action-btn-primary" bindtap="goIssues">查看问题句子</button>
+      <button class="action-btn action-btn-secondary" bindtap="recheck">重新检测</button>
     </view>
 
-    <button wx:if="{{canOptimize}}" class="primary-btn" bindtap="goOptimize">一键去AI味</button>
-    <view wx:else class="congrats-card">恭喜你！无需修改</view>
-    <view class="result-actions">
-      <button class="ghost-btn {{canViewIssues ? '' : 'disabled'}}" disabled="{{!canViewIssues}}" bindtap="goIssues">查看问题句子</button>
-      <button class="ghost-btn" bindtap="recheck">重新检测</button>
-    </view>
-  </view>
+    </block>
 
-  <view wx:else class="card empty-state">
+  <!-- 空状态 -->
+  <view wx:else class="empty-state">
     <text class="empty-title">暂无检测结果</text>
     <text class="empty-desc">请先回到首页输入文章。</text>
   </view>
-</scroll-view>
+
+  <view class="bottom-spacer"></view>
+</view>
