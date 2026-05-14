@@ -31,6 +31,12 @@ Page({
       this._initWithAnalysis(analysis)
     }
     this.setData({ loading: false })
+    this._setTabBarSelected(0)
+  },
+
+  _setTabBarSelected(index) {
+    const tabBar = this.selectComponent('#tab-bar')
+    tabBar && tabBar.setData({ selected: index })
   },
 
   _initWithAnalysis(analysis) {

@@ -3,6 +3,7 @@
 // 从 aiTextEngine.js 拆出的独立模块
 
 const localDetector = require('./aiDetector')
+const { analyzeSemantic } = require('./aiSemanticDetector')
 const { clamp, normalizeText, splitSentences } = require('./util')
 
 // ============================================================
@@ -59,16 +60,16 @@ const aiFlavorPatterns = [
   { label: '你要明白...', regex: /你要明白/g, weight: 5, type: '口吻模板' },
   { label: '愿你...', regex: /愿你/g, weight: 4, type: '鸡汤口吻' },
   { label: '长期主义', regex: /长期主义/g, weight: 5, type: '概念词' },
-  { label: '底层逻辑', regex: /底层逻辑/g, weight: 5, type: '概念词' },
-  { label: '情绪价值', regex: /情绪价值/g, weight: 4, type: '概念词' },
-  { label: '内耗', regex: /内耗/g, weight: 3, type: '概念词' },
+  { label: '底层逻辑', regex: /底层逻辑/g, weight: 2, type: '概念词' },
+  { label: '情绪价值', regex: /情绪价值/g, weight: 2, type: '概念词' },
+  { label: '内耗', regex: /内耗/g, weight: 1, type: '概念词' },
   { label: '松弛感', regex: /松弛感/g, weight: 3, type: '概念词' },
   { label: '赋能', regex: /赋能/g, weight: 4, type: '概念词' },
   { label: '闭环', regex: /闭环/g, weight: 4, type: '概念词' },
   { label: '颗粒度', regex: /颗粒度/g, weight: 4, type: '概念词' },
   { label: '齐抓共管', regex: /齐抓共管/g, weight: 4, type: '公文腔' },
   { label: '多措并举', regex: /多措并举/g, weight: 4, type: '公文腔' },
-  { label: '落地', regex: /落地/g, weight: 3, type: '概念词' },
+  { label: '落地', regex: /落地/g, weight: 1, type: '概念词' },
   { label: '抓手', regex: /抓手/g, weight: 3, type: '概念词' },
 
   // ---- v2.0 新增 ----
@@ -128,8 +129,10 @@ const aiFlavorPatterns = [
 ]
 
 const concretePatterns = [
-  /\d+(\.\d+)?%?/g, /20\d{2}年/g, /第[一二三四五六七八九十\d]+/g, /"[^"]{2,}"/g,
+  /\d+(\.\d+)?%?/g, /20\d{2}年/g, /第[一二三四五六七八九十\d]+/g,
   /《[^》]{2,}》/g,  /https?:\/\/\S+/g, /\d+月/g, /\d+日/g, /\d+[点时]/g,
+  // 引号：仅统计对话引号（5字及以上），排除抽象概念加引号（如"有一天""第几天"）
+  /"[^"]{5,}"/g,
   // v2.1 扩展: 增强具体性检测
   /[一二三四五六七八九十百千万亿]+[元只个条张件家口座间栋层次]/g,  // 中文量词
   /[A-Z\u00C0-\u00D6\u00D8-\u00DE][a-z\u00E0-\u00F6\u00F8-\u00FE]{1,10}[\s，。！？]/g,  // 专有名词（大写开头英文）
@@ -217,6 +220,117 @@ function countParallelismHits(text) {
   return hits + countMatches(text, /既[^。！？；;\n]{1,24}也[^。！？；;\n]{1,24}更/g) + countMatches(text, /越[^。！？；;\n]{1,18}越/g)
 }
 
+// ============================================================
+// v3.0 上下文感知: 新增辅助函数
+// ============================================================
+
+/**
+ * 策略一: 上下文感知的"不是…而是"分类
+ * 检查"而是"后面是否跟具体场景/引语/人称动作（人类写作特征）
+ * 如果是人类味的对比论证，返回 true
+ */
+function isHumanNotButContext(text, matchStart, matchLength) {
+  // 匹配完整的"不是...而是..."部分
+  const afterErShi = text.slice(matchStart + matchLength, matchStart + matchLength + 30)
+  // 检查"而是"后面15字内
+  const checkWindow = afterErShi.slice(0, 15)
+  // AI味信号：抽象概念、价值判断、空洞总结
+  const aiSignal = /(真正的|成长|价值|意义|自由|幸福|成功|强大|至关重要|不可忽视|本质|核心|关键|在于)/.test(checkWindow)
+  // 人类味信号：引号、具体人称动作、具体名词、问句
+  const humanSignal = /["""''""]/.test(checkWindow) || // 引号（具体话语）
+    /[他她它你我他们]/.test(checkWindow) || // 人称
+    /(这个|那个|一个|同事|朋友|孩子|书|钱|工作|问题|事情|时候|原因|结果)/.test(checkWindow) // 具体名词
+  if (humanSignal && !aiSignal) return true
+  if (aiSignal && !humanSignal) return false
+  // 模糊时：检查整个句子的具体性
+  const sentenceEnd = text.indexOf('。', matchStart) > 0 ? text.indexOf('。', matchStart) : text.indexOf('\n', matchStart)
+  const fullSentence = text.slice(Math.max(0, text.lastIndexOf('。', matchStart) + 1), sentenceEnd > 0 ? sentenceEnd + 1 : matchStart + matchLength + 30)
+  // 有人称、引号或具体日期数字 → 人类
+  if (/["""''""]/.test(fullSentence) || /[他她]/.test(fullSentence) || /\d+/.test(fullSentence)) return true
+  return false
+}
+
+/**
+ * 策略二: 概念词是否被自然使用
+ * 如果出现在问句中/引号内/周围有具体实例 → 自然使用
+ */
+function isConceptUsedNaturally(text, matchStart) {
+  const before = text.slice(Math.max(0, matchStart - 20), matchStart)
+  const after = text.slice(matchStart, matchStart + 30)
+  // 问句中 → 自然（"底层逻辑是什么？"）
+  if (/(什么|怎么|如何|为啥|为什么)\s*$/.test(before.trim())) return true
+  if (/^\s*(什么|怎么|如何|为啥|为什么|[？?])/.test(after)) return true
+  // 引号内 → 自然
+  const lineStart = text.lastIndexOf('\n', matchStart)
+  const lineEnd = text.indexOf('\n', matchStart)
+  const line = text.slice(lineStart >= 0 ? lineStart : 0, lineEnd > 0 ? lineEnd : text.length)
+  if (/["""''""]/.test(line.slice(0, matchStart - lineStart)) && 
+      /["""''""]/.test(line.slice(matchStart - lineStart))) return true
+  // 周围有具体实例 → 自然
+  const context = before.slice(-15) + after.slice(0, 15)
+  if (/(比如|例如|举例|像|如|具体|什么|一个|这个|那个)/.test(context)) return true
+  return false
+}
+
+/**
+ * 策略四: 检测文本体裁
+ * 返回 'argumentative'（说理/议论文）或 'narrative'（叙事/故事）或 'general'
+ */
+function detectGenre(text) {
+  // 说理文标记: 结构化标题、序号、对比框架
+  const argumentativeSignals = [
+    /[一二三四五六七八九十]+[、.．]/g,
+    /首先[，,].*其次[，,]/g,
+    /第[一二三四五六七八九十\d]+[个类点种]/g,
+    /特征[一二三四五六七八九十\d]/g,
+    /总结下来|归纳起来|主要有/,
+    /一方面.*另一方面/,
+  ]
+  // 叙事文标记: 个人经历、时间线、具体场景
+  const narrativeSignals = [
+    /有一次|那[天次年]|我记得|当时|后来|以前|曾经/,
+    /搬家|遇见|遇到|碰到|发现|开始|坚持了/,
+    /朋友|同事|同学|家人|邻居/,
+    /书|跑步|画画|小说|日记/,
+  ]
+  let argScore = 0
+  let narScore = 0
+  argumentativeSignals.forEach(p => {
+    const m = text.match(p)
+    if (m) argScore += m.length
+  })
+  narrativeSignals.forEach(p => {
+    const m = text.match(p)
+    if (m) narScore += m.length
+  })
+  if (argScore >= 2 && argScore > narScore) return 'argumentative'
+  if (narScore >= 3 && narScore > argScore) return 'narrative'
+  return 'general'
+}
+
+/**
+ * 策略五: 句子长度原始标准差
+ * 高标准差 = 人类写作铁证（AI句子长度过于均匀）
+ */
+function getSentenceLengthStd(sentences) {
+  if (sentences.length < 6) return 0
+  const lengths = sentences.map(s => s.length)
+  const avg = lengths.reduce((a, b) => a + b, 0) / lengths.length
+  const variance = lengths.reduce((sum, l) => sum + Math.pow(l - avg, 2), 0) / lengths.length
+  const std = Math.sqrt(variance)
+  const maxLen = Math.max(...lengths)
+  const minLen = Math.min(...lengths)
+  return { std, range: maxLen - minLen, maxLen, minLen }
+}
+
+/**
+ * 策略三: 计算具体细节密度
+ */
+function getConcreteDensity(concreteHits, wordCount) {
+  if (wordCount < 50) return 0
+  return concreteHits / wordCount
+}
+
 // 四字短语密度检测
 function countFourCharPhrases(text) {
   const fourCharPatterns = [
@@ -256,14 +370,49 @@ function countFourCharPhrases(text) {
   return count
 }
 
-function collectPatternHits(text) {
+function collectPatternHits(text, fullText) {
   const details = []
   let score = 0
   aiFlavorPatterns.forEach((pattern) => {
     const matches = text.match(pattern.regex)
     if (matches && matches.length) {
-      score += matches.length * pattern.weight
-      details.push({ label: pattern.label, count: matches.length, type: pattern.type, weight: pattern.weight })
+      let contextAdjustedScore = matches.length * pattern.weight
+      // 如果是"不是…而是"类句式，检查上下文
+      if (fullText && (
+        pattern.label.indexOf('不是') >= 0 ||
+        pattern.label.indexOf('而是') >= 0 ||
+        pattern.label.indexOf('不等于') >= 0
+      )) {
+        let humanMatchCount = 0
+        // 重新对每个匹配位置做上下文检查
+        const regex = new RegExp(pattern.regex.source, 'g')
+        let m
+        while ((m = regex.exec(fullText)) !== null) {
+          if (isHumanNotButContext(fullText, m.index, m[0].length)) {
+            humanMatchCount++
+          }
+        }
+        // 人类味匹配仅计原权重的20%
+        const aiMatchCount = matches.length - humanMatchCount
+        contextAdjustedScore = aiMatchCount * pattern.weight + humanMatchCount * Math.round(pattern.weight * 0.2)
+      }
+      // 概念词上下文判断
+      if (fullText && pattern.type === '概念词' && pattern.weight > 1) {
+        let naturalCount = 0
+        const regex = new RegExp(pattern.regex.source, 'g')
+        let m
+        while ((m = regex.exec(fullText)) !== null) {
+          if (isConceptUsedNaturally(fullText, m.index)) {
+            naturalCount++
+          }
+        }
+        if (naturalCount > 0) {
+          const aiCount = matches.length - naturalCount
+          contextAdjustedScore = aiCount * pattern.weight + naturalCount * 1
+        }
+      }
+      score += contextAdjustedScore
+      details.push({ label: pattern.label, count: matches.length, type: pattern.type, weight: pattern.weight, contextScore: contextAdjustedScore })
     }
   })
   const templateCount = templatePhrases.reduce((total, phrase) => total + (text.indexOf(phrase) >= 0 ? 1 : 0), 0)
@@ -359,7 +508,7 @@ function analyzeArticle(text, options = {}) {
   const averageSentenceLength = sentences.length ? sentences.reduce((sum, item) => sum + item.length, 0) / sentences.length : 0
   const uniqueRatio = getUniqueRatio(normalized)
   const variance = getSentenceVariance(sentences)
-  const wholeHits = collectPatternHits(normalized)
+  const wholeHits = collectPatternHits(normalized, normalized)
   const concreteHits = concretePatterns.reduce((total, pattern) => total + countMatches(normalized, pattern), 0)
   const humanSignalHits = humanSignalPatterns.reduce((total, pattern) => total + countMatches(normalized, pattern), 0)
   const fourCharHits = countFourCharPhrases(normalized)
@@ -396,90 +545,116 @@ function analyzeArticle(text, options = {}) {
   // 设计原则:
   // 1. 低基线（8分）— 干净文本不应自动获得高分
   // 2. "实质 > 形式" — 具体细节/人称信号 > 模板匹配
-  // 3. 具体-模式比（concrete-to-pattern ratio）是核心校准器
-  // 4. 减法权重大于加法权重（人声信号 > 句式模板）
-  // 5. 长文本的 n-gram 特征仅对极端值生效
+  // 3. 体裁感知 — 不同类型的文本使用不同阈值
+  // 4. 上下文感知 — 判断句式是被"使用"还是被"讨论"
   // ============================================================
-  let score = 8
+  // --- 体裁参数: 用户选择 + 自动检测互补 ---
+  const userType = options.articleType || '通用文本'
+  const TYPE_PARAMS = {
+    '通用文本': { baseline: 8, patternMul: 2.0, concreteThreshold: 1, humanMul: 1.0, funcWordThreshold: 0.13 },
+    '论文/作业': { baseline: 10, patternMul: 1.5, concreteThreshold: 0, humanMul: 0.8, funcWordThreshold: 0.15 },
+    '公众号文章': { baseline: 6, patternMul: 2.3, concreteThreshold: 2, humanMul: 0.9, funcWordThreshold: 0.12 },
+    '小红书笔记': { baseline: 4, patternMul: 1.8, concreteThreshold: 1, humanMul: 1.2, funcWordThreshold: 0.11 },
+  }
+  const params = TYPE_PARAMS[userType] || TYPE_PARAMS['通用文本']
+  let score = params.baseline
+
+  // --- v3.0 新: 体裁检测 & 上下文数据预计算 ---
+  const genre = detectGenre(normalized)
+  const lenStats = getSentenceLengthStd(sentences)
+  const concreteDensity = getConcreteDensity(concreteHits, wordCount)
+  // "比如" 单独计算——它是举例词，不算强人类信号
+  const biRuCount = (normalized.match(/比如/g) || []).length
 
   // --- 加分项（AI 信号） ---
-  // 1) 句式命中: 适度降权，乘数 1.5→1.2，cap 50→40
-  score += Math.min(Math.round(wholeHits.score * 1.8), 40)
+  // 1) 句式命中: 使用上下文感知后的 contextScore
+  let patternTotalScore = wholeHits.details.reduce((sum, d) => sum + (d.contextScore || d.count * d.weight), 0)
+  score += Math.min(Math.round(patternTotalScore * params.patternMul), 45)
 
-  // 2) 句长特征: 提高阈值 → 仅极端长句才加分
+  // 2) 句长特征: 仅极端长句
   if (averageSentenceLength > 42) score += 4
   if (averageSentenceLength > 56) score += 3
 
-  // 3) 句长方差（burstiness proxy）: 更严苛
+  // 3) 句长方差（burstiness proxy）
   if (variance < 0.22 && sentences.length >= 8) score += 5
 
-  // 4) 字符去重比率: 提高阈值
+  // 4) 字符去重比率
   if (uniqueRatio < 0.24 && wordCount > 400) score += 4
 
-  // 5) 四字短语: 显著降权，仅对高频生效
+  // 5) 四字短语
   if (fourCharHits > 2) score += Math.min(8, fourCharHits * 1.5)
 
-  // 6) 虚词密度: 仅对极端高值生效
-  if (wordCount > 150 && functionWordRatio > 0.13) {
-    score += Math.min(4, Math.round((functionWordRatio - 0.13) * 200))
+  // 6) 虚词密度
+  if (wordCount > 150 && functionWordRatio > params.funcWordThreshold) {
+    score += Math.min(4, Math.round((functionWordRatio - params.funcWordThreshold) * 200))
   }
 
-  // 7) trigram 复现率: 仅极端高值
+  // 7-9) n-gram 特征（不变）
   if (wordCount > 200 && trigramRepeatRatio > 0.28) {
     score += Math.min(3, Math.round((trigramRepeatRatio - 0.28) * 30))
   }
-
-  // 8) 词级 bigram 重复率: 仅极端高值
   if (wordCount > 200 && wordBigramRepeat > 0.30) {
     score += Math.min(5, Math.round((wordBigramRepeat - 0.30) * 25))
   }
-
-  // 9) 词级 trigram 重复率: 仅极端高值
   if (wordCount > 200 && wordTrigramRepeat > 0.18) {
     score += Math.min(3, Math.round((wordTrigramRepeat - 0.18) * 25))
   }
 
   // 10) 缺少具体细节
-  if (wordCount > 300 && concreteHits <= 1) score += 4
+  if (wordCount > 300 && concreteHits <= params.concreteThreshold) score += 4
   if (wordCount > 200 && concreteHits <= 0) score += 5
 
-  // --- 扣分项（人类信号）— 权重显著提高 ---
-  // 修正 "自我" 误匹配: "自我" 中的 "我" 是反身代词，不是人称主语
+  // --- 扣分项（人类信号） ---
+  // 11) 人类信号扣分（分级权重）
+  // 强人声（第一人称经验）：我记得、我觉得、我见过 → 高权重
+  // 普通人声（举例词、时间词）：比如、当时、今天 → 低权重
+  const strongVoice = (normalized.match(/(我记得|我觉得|我感觉|我见过|我遇到|说实话|坦白讲|举个例子)/g) || []).length
+  const weakVoice = (normalized.match(/(比如|当时|后来|最近|今天|有一次|那天|有次)/g) || []).length
   const totalSelfMatches = (normalized.match(/自我/g) || []).length
-  const adjustedHumanSignalHits = Math.max(0, humanSignalHits - totalSelfMatches)
-
-  // 11) 人类信号扣分（每个有效命中扣 3 分，上限 15）
-  // 去掉 /我/g /我们/g 后，剩余模式更精准（说实话、我记得等），适度降权避免误杀
-  if (adjustedHumanSignalHits > 0) {
-    score -= Math.min(15, adjustedHumanSignalHits * 2)
+  const adjustedStrongVoice = Math.max(0, strongVoice)
+  const adjustedWeakVoice = Math.max(0, weakVoice - totalSelfMatches)
+  
+  const effectiveHumanScore = adjustedStrongVoice * 3 + Math.round(adjustedWeakVoice * 0.5)
+  if (effectiveHumanScore > 0) {
+    score -= Math.min(15, Math.round(effectiveHumanScore * 2 * params.humanMul))
   }
 
-  // 12) 具体事实扣分（更积极）
-  if (concreteHits >= 2) score -= 8
-  if (concreteHits >= 5) score -= 10
+  // 12) 具体事实扣分（按数量阶梯，不加cap）
+  // concreteHits 越高 → 扣分越多，但不算"人类"信号而是"具体性"信号
+  // 32(你的) 15分 vs 66(DeepSeek) 15分 → 再增加高级阶梯
+  if (concreteHits >= 40) score -= 18
+  else if (concreteHits >= 30) score -= 14
+  else if (concreteHits >= 20) score -= 10
+  else if (concreteHits >= 10) score -= 7
+  else if (concreteHits >= 5) score -= 4
+  else if (concreteHits >= 2) score -= 2
 
-  // 14) 防冻结下限: 多重扣分叠加后，真实写作不应被压到与 AI 无区别的程度
-  // 注: 不再额外做短文本扣分，防冻结下限已经覆盖短文本场景
-  if (score < 5) score = 5
-  // 如果文本同时有具体细节 AND 人类信号但被误判为 AI → 大幅减分
-  // ratio = (concreteHits + humanSignalHits/3) / patternCount
-  // ratio > 1.5 → 有效内容多于模板，减分
-  // ratio > 3.0 → 真实写作特征显著，大幅减分
+  // 如果文本同时有具体细节 AND 人类信号但被误判为 AI → 减分
   const patternCount = wholeHits.details.length
-  if (concreteHits > 0 && humanSignalHits > 0 && patternCount > 0) {
-    const ratio = (concreteHits + humanSignalHits / 3) / patternCount
-    if (ratio > 3) score -= 12
-    else if (ratio > 1.5) score -= 6
-    else if (ratio > 0.8) score -= 3
+  if (concreteHits > 0 && effectiveHumanScore > 0 && patternCount > 0) {
+    const ratio = (concreteHits + effectiveHumanScore / 5) / patternCount
+    if (ratio > 3) score -= 5
+    else if (ratio > 1.5) score -= 3
   }
 
-  // 额外: 高人类信号 + 有具体事实的组合，即使是长文本也大幅降低
-  if (humanSignalHits >= 2 && concreteHits >= 2 && score > 15) {
-    score -= 8
-  }
-
-  // 14) 防冻结下限: 多重扣分叠加后，真实写作不应被压到 3（与 clamp 下限重合）
+  // 防冻结下限
   if (score < 5) score = 5
+
+  // ============================================================
+  // v3.0: 语义级检测融合（零外部依赖，纯JS）
+  // 基于困惑度 + 过渡平滑度 + 词汇多样性曲线
+  // ============================================================
+  let semanticAnalysis = null
+  if (wordCount > 100) {
+    try {
+      semanticAnalysis = analyzeSemantic(normalized)
+      const semanticScore = Math.round(semanticAnalysis.overallScore / 2) // 归一化到0-50
+      // 语义得分权重：30%
+      score = Math.round(score * 0.70 + semanticScore * 0.30)
+    } catch (error) {
+      semanticAnalysis = null
+    }
+  }
 
   // ============================================================
   // v3.0: 本地检测器融合（降低权重，减少误判）
@@ -682,6 +857,23 @@ function analyzeArticle(text, options = {}) {
       statisticalFeatures: localDetection.metadata.statistical_features,
       semanticFeatures: localDetection.metadata.deep_learning_features,
     } : null,
+    semanticAnalysis: semanticAnalysis ? {
+      overallScore: semanticAnalysis.overallScore,
+      components: {
+        perplexity: {
+          score: semanticAnalysis.components.perplexity.score,
+          avgPPL: semanticAnalysis.components.perplexity.avgPPL,
+          stdPPL: semanticAnalysis.components.perplexity.stdPPL,
+        },
+        smoothness: {
+          score: semanticAnalysis.components.smoothness.score,
+          avgSimilarity: semanticAnalysis.components.smoothness.avgSimilarity,
+        },
+        variety: {
+          score: semanticAnalysis.components.variety.score,
+        },
+      },
+    } : null,
     createdAt: Date.now(),
     ...risk,
   }
@@ -695,4 +887,10 @@ module.exports = {
   // v2.1 新增导出（便于测试）
   pseudoTokenize,
   wordLevelNgramRepetition,
+  // v3.0 新增导出
+  detectGenre,
+  getSentenceLengthStd,
+  getConcreteDensity,
+  isHumanNotButContext,
+  isConceptUsedNaturally,
 }

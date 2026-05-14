@@ -1,5 +1,28 @@
-<scroll-view class="safe-page" scroll-y type="list">
-  <view class="nav-bar"><button class="nav-icon" bindtap="goBack">‹</button><text class="nav-title">历史记录</text><view class="nav-actions"><button class="nav-icon small" bindtap="goHome">⌂</button><button class="edit" bindtap="clearHistory">清空</button></view></view>
-  <view wx:if="{{records.length}}"><view wx:for="{{records}}" wx:key="id" data-index="{{index}}" bindtap="openRecord" class="card record-card"><view class="doc-icon">▤</view><view class="record-copy"><text class="record-title">{{item.title}}</text><text class="record-meta">字数：{{item.wordCount}}　{{item.time}}</text></view><view class="record-tags"><text class="status detect">检测完成</text><text class="score">AI {{item.score}}%</text></view></view></view>
-  <view wx:else class="card empty-state"><text class="empty-title">还没有历史记录</text><text class="empty-desc">完成检测后会自动保存在这里。</text></view>
+<scroll-view class="page" scroll-y type="list">
+  <!-- 顶部紫粉渐变 -->
+  <view class="top-banner page-banner">
+    <view class="clear-action" bindtap="clearHistory"><text>🗑️</text><text>一键清空</text></view>
+  </view>
+
+  <!-- 主卡片内容区 -->
+  <view class="main-card">
+    <view wx:if="{{records.length}}">
+      <view wx:for="{{records}}" wx:key="id" data-index="{{index}}" bindtap="openRecord" class="record-card">
+        <view class="record-icon">▤</view>
+        <view class="record-info">
+          <text class="record-title">{{item.title}}</text>
+          <text class="record-meta">字数：{{item.wordCount}}　{{item.time}}</text>
+        </view>
+        <view class="record-tags">
+          <text class="tag-status status-detect">检测完成</text>
+          <text class="tag-score">AI {{item.score}}%</text>
+        </view>
+      </view>
+    </view>
+    <view wx:else class="empty-block">
+      <text class="empty-title">还没有历史记录</text>
+      <text class="empty-desc">完成检测后会自动保存在这里。</text>
+    </view>
+  </view>
+  <view class="bottom-spacer"></view>
 </scroll-view>

@@ -50,4 +50,7 @@
       <view class="bottom-spacer"></view>
     </scroll-view>
   </block>
+
+  <!-- 底部 tab 切换 -->
+  <tab-bar id="tab-bar"></tab-bar>
 </view>

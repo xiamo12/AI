@@ -1,24 +1,31 @@
-<scroll-view class="safe-page" scroll-y type="list">
-  <view class="nav-bar">
-    <button class="nav-icon" bindtap="goBack">‹</button>
-    <text class="nav-title">我的</text>
-    <button class="nav-icon" bindtap="goHome">⌂</button>
-  </view>
+<scroll-view class="page" scroll-y type="list">
+  <!-- 顶部紫粉渐变 -->
+  <view class="top-banner page-banner"></view>
 
-  <view class="card profile-card">
-    <view class="avatar">AI</view>
-    <view>
-      <text class="name">阅检用户</text>
-      <text class="desc">本地检测工具，数据仅保存在当前设备</text>
+  <!-- 主卡片 -->
+  <view class="main-card">
+    <!-- 用户信息 -->
+    <view class="profile-card">
+      <view class="avatar">AI</view>
+      <view class="profile-info">
+        <text class="name">阅检用户</text>
+        <text class="desc">本地检测工具，数据仅保存在当前设备</text>
+      </view>
+    </view>
+
+    <!-- 统计 -->
+    <view class="stats-row">
+      <view class="stat-item">
+        <text class="stat-num">{{total}}</text>
+        <text class="stat-label">历史记录</text>
+      </view>
+    </view>
+
+    <!-- 使用说明 -->
+    <view class="about-section">
+      <text class="section-title">使用说明</text>
+      <text class="section-desc">检测结果基于本地启发式规则，用于辅助判断文章是否存在明显AI痕迹。</text>
     </view>
   </view>
-
-  <view class="stats">
-    <view class="card stat"><text>{{total}}</text><text>历史记录</text></view>
-  </view>
-
-  <view class="card about">
-    <text class="section-title">使用说明</text>
-    <text class="section-subtitle">检测结果基于本地启发式规则，用于辅助判断文章是否存在明显AI痕迹。</text>
-  </view>
+  <view class="bottom-spacer"></view>
 </scroll-view>

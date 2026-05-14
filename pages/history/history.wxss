@@ -1,13 +1,129 @@
-.edit { color: #6f7d8e; font-size: 25rpx; line-height: 64rpx; }
-.history-tabs { margin: 14rpx 0 24rpx; display: grid; grid-template-columns: repeat(3, 1fr); border-bottom: 1rpx solid #e5ecf2; }
-.history-tab { height: 76rpx; color: #6d7b8e; font-size: 26rpx; font-weight: 700; line-height: 76rpx; text-align: center; }
-.history-tab.active { color: #075f73; border-bottom: 4rpx solid #13a86d; }
-.record-card { margin-bottom: 20rpx; padding: 22rpx; display: flex; align-items: center; gap: 18rpx; }
-.doc-icon { width: 72rpx; height: 72rpx; border-radius: 16rpx; background: #eaf8f7; color: #075f73; font-size: 34rpx; line-height: 72rpx; text-align: center; }
-.record-copy { flex: 1; min-width: 0; }
-.record-title { display: block; color: #102733; font-size: 28rpx; font-weight: 800; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.record-meta { display: block; margin-top: 10rpx; color: #7f8b9a; font-size: 22rpx; }
-.record-tags { display: flex; flex-direction: column; align-items: flex-end; gap: 8rpx; }
-.status, .score { height: 40rpx; padding: 0 14rpx; border-radius: 10rpx; font-size: 21rpx; font-weight: 800; line-height: 40rpx; }
-.status.detect { background: #eaf2ff; color: #0b5fff; } .status.optimize { background: #eaf8f1; color: #13a86d; }
-.score { background: #eef3f7; color: #075f73; }
+/* ===== 顶部渐变头 ===== */
+.page-banner {
+  height: 256rpx;
+  background: linear-gradient(135deg, #5B5CFF 0%, #8A3CFF 50%, #FF4FCB 100%);
+  position: relative;
+  border-radius: 0 0 50rpx 50rpx;
+  overflow: hidden;
+}
+
+/* 一键清空 — 半透明白色胶囊按钮 */
+.clear-action {
+  position: absolute;
+  bottom: 28rpx;
+  left: 24rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10rpx;
+  font-size: 24rpx;
+  color: #6D5CFF;
+  font-weight: 800;
+  width: 184rpx;
+  padding: 26rpx 0;
+  border-radius: 28rpx;
+  background: rgba(255, 255, 255, 0.7);
+  border: none;
+  line-height: 1;
+  z-index: 5;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.04);
+}
+.clear-action:active {
+  background: rgba(255, 255, 255, 0.5);
+  transform: scale(0.96);
+}
+
+/* ===== 主卡片区（同首页） ===== */
+.main-card {
+  margin: 10rpx 20rpx 0;
+  padding: 24rpx 24rpx 28rpx;
+  background: #FFFFFF;
+  border-radius: 24rpx;
+  box-shadow: 0 8rpx 24rpx rgba(39, 52, 125, 0.08);
+  position: relative;
+  z-index: 10;
+}
+
+/* ===== 记录卡片 ===== */
+.record-card {
+  padding: 22rpx 0;
+  display: flex;
+  align-items: center;
+  gap: 18rpx;
+  border-bottom: 2rpx solid #F0F2F8;
+}
+.record-card:last-child {
+  border-bottom: none;
+}
+
+.record-icon {
+  width: 72rpx;
+  height: 72rpx;
+  border-radius: 16rpx;
+  background: #F0EEFF;
+  color: #6D5CFF;
+  font-size: 34rpx;
+  line-height: 72rpx;
+  text-align: center;
+  flex-shrink: 0;
+}
+.record-info {
+  flex: 1;
+  min-width: 0;
+}
+.record-title {
+  display: block;
+  color: #222222;
+  font-size: 28rpx;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.record-meta {
+  display: block;
+  margin-top: 8rpx;
+  color: #8D8FA3;
+  font-size: 22rpx;
+}
+.record-tags {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6rpx;
+  flex-shrink: 0;
+}
+.tag-status, .tag-score {
+  height: 40rpx;
+  padding: 0 14rpx;
+  border-radius: 10rpx;
+  font-size: 21rpx;
+  font-weight: 700;
+  line-height: 40rpx;
+}
+.tag-status.status-detect {
+  background: #F0EEFF;
+  color: #6D5CFF;
+}
+.tag-score {
+  background: #F5F6FB;
+  color: #555770;
+}
+
+/* ===== 空状态 ===== */
+.empty-block {
+  padding: 80rpx 0;
+  text-align: center;
+}
+.empty-title {
+  display: block;
+  color: #222222;
+  font-size: 30rpx;
+  font-weight: 600;
+}
+.empty-desc {
+  display: block;
+  margin-top: 14rpx;
+  color: #8D8FA3;
+  font-size: 24rpx;
+}

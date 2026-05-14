@@ -212,5 +212,5 @@
 
 /* ===== 底部安全区 ===== */
 .bottom-spacer {
-  height: calc(40rpx + env(safe-area-inset-bottom));
+  height: calc(160rpx + env(safe-area-inset-bottom));
 }

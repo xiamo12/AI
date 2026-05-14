@@ -156,12 +156,12 @@
 /* ===== 底部操作按钮（固定窗口底部） ===== */
 .btn-area {
   position: fixed;
-  bottom: 0;
+  bottom: 120rpx;
   left: 0;
   right: 0;
   z-index: 100;
   background: #F4F7FF;
-  padding: 24rpx 32rpx calc(60rpx + env(safe-area-inset-bottom));
+  padding: 24rpx 32rpx;
   display: flex;
   flex-direction: row;
   gap: 20rpx;
@@ -202,7 +202,7 @@
   flex-direction: column;
   margin: 10px 32rpx 0;
   overflow: hidden;
-  padding-bottom: 120rpx;
+  padding-bottom: 260rpx;
 }
 .analysis-scroll {
   flex: 1;

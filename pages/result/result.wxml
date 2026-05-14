@@ -57,6 +57,9 @@
       <button class="action-btn action-btn-secondary" bindtap="recheck">重新检测</button>
     </view>
 
+    <!-- 底部 tab 切换 -->
+    <tab-bar id="tab-bar"></tab-bar>
+
     </block>
 
   <!-- 空状态 -->

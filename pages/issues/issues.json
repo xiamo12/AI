@@ -1,1 +1,6 @@
-{"navigationStyle":"custom"}
+{
+  "navigationStyle": "custom",
+  "usingComponents": {
+    "tab-bar": "/custom-tab-bar/index"
+  }
+}

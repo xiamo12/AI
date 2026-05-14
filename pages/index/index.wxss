@@ -1,7 +1,15 @@
 /* 首页 — 阅检AI助手 v2 */
-.page {
+
+/* ===== 页面布局：上下结构，底部固定 ===== */
+.page-wrap {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
   background: #F6F7FB;
-  min-height: 100vh;
+}
+.main-scroll {
+  flex: 1;
+  overflow-y: scroll;
 }
 
 /* ===== 顶部通栏 ===== */
@@ -36,11 +44,13 @@
   flex-direction: column;
   flex-shrink: 0;
 }
+
+/* 阅检 — 大师感字体设计 */
 .main-title {
-  font-size: 44rpx;
-  font-weight: 700;
+  font-size: 52rpx;
+  font-weight: 800;
+  letter-spacing: 16rpx;
   color: #FFFFFF;
-  white-space: nowrap;
 }
 .sub-title {
   margin-top: 8rpx;
@@ -96,30 +106,33 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 12rpx;
+  margin-bottom: 20rpx;
 }
 .input-title {
   font-size: 30rpx;
-  font-weight: 600;
+  font-weight: 700;
   color: #222222;
+  padding: 12rpx 0 12rpx 14rpx;
+  border-left: 4rpx solid #6D5CFF;
+  line-height: 1.5;
 }
 .clear-btn {
-  font-size: 24rpx;
-  color: #999999;
-  padding: 4rpx 12rpx;
-  border-radius: 12rpx;
-  background: transparent;
-  border: none;
+  font-size: 22rpx;
+  color: #8D8FA3;
+  font-weight: 500;
+  background: #F5F6FB;
+  padding: 6rpx 18rpx;
+  border-radius: 16rpx;
   line-height: 1;
 }
 .clear-btn:active {
-  background: #f0f0f0;
+  background: #EBECF3;
 }
 
 /* 文本输入框 */
 .text-input {
   width: 100%;
-  min-height: 200rpx;
+  height: 350rpx;
   padding: 24rpx;
   background: #F7F8FC;
   border-radius: 16rpx;
@@ -139,53 +152,65 @@
   border-color: #6D5CFF;
 }
 
-/* 字数 + 一键粘贴行 */
-.word-count-row {
-  margin-top: 8rpx;
+/* 一键粘贴 + 字数统计 — 同一行 */
+.paste-row {
+  margin-top: 16rpx;
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  padding: 0 4rpx;
+  justify-content: space-between;
 }
 .paste-btn {
-  font-size: 24rpx;
-  color: #6D5CFF;
+  height: 72rpx;
+  padding: 0 36rpx;
+  border-radius: 36rpx;
+  background: linear-gradient(90deg, #6D5CFF 0%, #9B7AFF 100%);
+  color: #FFFFFF;
+  font-size: 26rpx;
   font-weight: 600;
-  background: #F5F3FF;
-  border: 2rpx solid #E2DEFF;
-  border-radius: 16rpx;
-  padding: 8rpx 24rpx;
-  line-height: 1.5;
-  height: auto;
+  box-shadow: 0 6rpx 20rpx rgba(109, 92, 255, 0.2);
+  line-height: 72rpx;
+  text-align: center;
 }
 .paste-btn:active {
-  background: #EBE8FF;
+  opacity: 0.9;
+  transform: translateY(2rpx);
 }
+
+/* 字数 */
 .word-count {
-  text-align: right;
   font-size: 22rpx;
   color: #B0B3BE;
 }
 
 /* 文本类型 */
 .template-section {
-  margin-top: 24rpx;
+  margin-top: 40rpx;
 }
 .template-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 14rpx;
+  margin-bottom: 24rpx;
 }
 .template-title {
   font-size: 30rpx;
-  font-weight: 600;
+  font-weight: 700;
   color: #222222;
+  padding: 12rpx 0 12rpx 14rpx;
+  border-left: 4rpx solid #6D5CFF;
+  line-height: 1.5;
 }
 .more-template {
-  font-size: 24rpx;
-  color: #8D8FA3;
-  padding: 4rpx 8rpx;
+  font-size: 22rpx;
+  color: #6D5CFF;
+  font-weight: 600;
+  background: #F0EEFF;
+  padding: 6rpx 18rpx;
+  border-radius: 20rpx;
+  line-height: 1;
+}
+.more-template:active {
+  background: #E2DEFF;
 }
 
 /* 4列网格 */
@@ -225,9 +250,19 @@
   font-weight: 700;
 }
 
-/* 检测按钮 */
+/* ===== 固定底部检测按钮 ===== */
+.bottom-fixed-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  background: #F6F7FB;
+  padding: 0 32rpx calc(60rpx + env(safe-area-inset-bottom));
+}
+
 .detect-btn {
-  margin-top: 24rpx;
+  width: 100%;
   height: 100rpx;
   border-radius: 50rpx;
   background: linear-gradient(90deg, #5568FF 0%, #FF47C7 100%);
@@ -244,7 +279,6 @@
   opacity: 0.9;
 }
 
-/* 按钮下方说明 */
 .detect-desc {
   margin-top: 10rpx;
   text-align: center;
@@ -252,7 +286,7 @@
   color: #8D8FA3;
 }
 
-/* 底部安全区 */
+/* 底部安全区（防止滚动内容被固定栏遮挡） */
 .bottom-spacer {
-  height: 120rpx;
+  height: 260rpx;
 }

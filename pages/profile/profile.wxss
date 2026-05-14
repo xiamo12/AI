@@ -1,18 +1,99 @@
-.profile-card { margin-top: 22rpx; padding: 28rpx; display: flex; align-items: center; gap: 20rpx; }
-.avatar { width: 88rpx; height: 88rpx; border-radius: 24rpx; background: linear-gradient(145deg,#075f73,#13a86d); color: #fff; font-size: 30rpx; font-weight: 900; line-height: 88rpx; text-align: center; }
-.name { display: block; color: #102733; font-size: 31rpx; font-weight: 900; }
-.desc { display: block; margin-top: 8rpx; color: #7f8b9a; font-size: 23rpx; }
-.stats { margin-top: 22rpx; display: grid; grid-template-columns: 1fr 1fr; gap: 18rpx; }
-.stat { padding: 28rpx; text-align: center; }
-.stat text:first-child { display: block; color: #075f73; font-size: 46rpx; font-weight: 900; }
-.stat text:last-child { display: block; margin-top: 8rpx; color: #7f8b9a; font-size: 23rpx; }
-.about { margin-top: 22rpx; padding: 28rpx; }
-.card-row { display: flex; justify-content: space-between; align-items: center; gap: 20rpx; }
-.form-field { margin-top: 24rpx; }
-.field-label { display: block; color: #102733; font-size: 24rpx; font-weight: 800; margin-bottom: 12rpx; }
-.key-input, .picker-value { height: 82rpx; border-radius: 18rpx; background: #f6f8fa; border: 1rpx solid #dfe7eb; padding: 0 22rpx; color: #102733; font-size: 25rpx; line-height: 82rpx; }
-.field-hint { display: block; margin-top: 10rpx; color: #7f8b9a; font-size: 22rpx; }
-.setting-actions { margin-top: 26rpx; display: grid; grid-template-columns: 1fr 160rpx; gap: 16rpx; }
-.save-btn, .clear-btn { height: 84rpx; border-radius: 20rpx; font-size: 26rpx; font-weight: 800; line-height: 84rpx; }
-.save-btn { background: linear-gradient(135deg,#075f73,#13a86d); color: #fff; }
-.clear-btn { background: #f6f8fa; color: #6c7886; border: 1rpx solid #dfe7eb; }
+/* ===== 顶部渐变头 ===== */
+.page-banner {
+  height: 256rpx;
+  background: linear-gradient(135deg, #5B5CFF 0%, #8A3CFF 50%, #FF4FCB 100%);
+  position: relative;
+  border-radius: 0 0 50rpx 50rpx;
+  overflow: hidden;
+}
+/* ===== 主卡片区 ===== */
+.main-card {
+  margin: 10rpx 20rpx 0;
+  padding: 28rpx 24rpx;
+  background: #FFFFFF;
+  border-radius: 24rpx;
+  box-shadow: 0 8rpx 24rpx rgba(39, 52, 125, 0.08);
+  position: relative;
+  z-index: 10;
+}
+
+/* ===== 用户信息 ===== */
+.profile-card {
+  display: flex;
+  align-items: center;
+  gap: 20rpx;
+  padding-bottom: 24rpx;
+  border-bottom: 2rpx solid #F0F2F8;
+}
+.avatar {
+  width: 88rpx;
+  height: 88rpx;
+  border-radius: 24rpx;
+  background: linear-gradient(145deg, #6D5CFF, #D83AB3);
+  color: #FFFFFF;
+  font-size: 30rpx;
+  font-weight: 800;
+  line-height: 88rpx;
+  text-align: center;
+  flex-shrink: 0;
+}
+.profile-info {
+  flex: 1;
+  min-width: 0;
+}
+.name {
+  display: block;
+  color: #222222;
+  font-size: 30rpx;
+  font-weight: 700;
+}
+.desc {
+  display: block;
+  margin-top: 8rpx;
+  color: #8D8FA3;
+  font-size: 23rpx;
+  line-height: 1.4;
+}
+
+/* ===== 统计 ===== */
+.stats-row {
+  margin-top: 24rpx;
+}
+.stat-item {
+  padding: 28rpx;
+  text-align: center;
+  background: #F7F8FC;
+  border-radius: 16rpx;
+}
+.stat-num {
+  display: block;
+  color: #6D5CFF;
+  font-size: 46rpx;
+  font-weight: 800;
+}
+.stat-label {
+  display: block;
+  margin-top: 8rpx;
+  color: #8D8FA3;
+  font-size: 23rpx;
+}
+
+/* ===== 使用说明 ===== */
+.about-section {
+  margin-top: 24rpx;
+  padding-top: 24rpx;
+  border-top: 2rpx solid #F0F2F8;
+}
+.section-title {
+  display: block;
+  color: #222222;
+  font-size: 28rpx;
+  font-weight: 600;
+}
+.section-desc {
+  display: block;
+  margin-top: 12rpx;
+  color: #8D8FA3;
+  font-size: 24rpx;
+  line-height: 1.5;
+}

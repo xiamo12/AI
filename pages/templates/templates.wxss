@@ -1,1 +1,55 @@
-.template-grid { margin-top: 22rpx; display: grid; grid-template-columns: 1fr 1fr; gap: 18rpx; }.template-card { min-height: 190rpx; padding: 24rpx; }.template-icon { color: #075f73; font-size: 38rpx; }.template-title { display: block; margin-top: 16rpx; color: #102733; font-size: 28rpx; font-weight: 800; }.template-desc { display: block; margin-top: 10rpx; color: #7f8b9a; font-size: 23rpx; line-height: 1.45; }
+/* ===== 顶部渐变头 ===== */
+.page-banner {
+  height: 256rpx;
+  background: linear-gradient(135deg, #5B5CFF 0%, #8A3CFF 50%, #FF4FCB 100%);
+  position: relative;
+  border-radius: 0 0 50rpx 50rpx;
+  overflow: hidden;
+}
+/* ===== 主卡片区 ===== */
+.main-card {
+  margin: 10rpx 20rpx 0;
+  padding: 24rpx;
+  background: #FFFFFF;
+  border-radius: 24rpx;
+  box-shadow: 0 8rpx 24rpx rgba(39, 52, 125, 0.08);
+  position: relative;
+  z-index: 10;
+}
+
+/* ===== 模板网格（同首页） ===== */
+.template-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16rpx;
+}
+.template-card {
+  display: flex;
+  flex-direction: column;
+  min-height: 180rpx;
+  padding: 24rpx;
+  border-radius: 16rpx;
+  border: 2rpx solid #EEF0F5;
+  background: #FFFFFF;
+}
+.template-card:active {
+  transform: scale(0.96);
+}
+.t-icon {
+  color: #6D5CFF;
+  font-size: 38rpx;
+}
+.t-name {
+  display: block;
+  margin-top: 16rpx;
+  color: #222222;
+  font-size: 28rpx;
+  font-weight: 600;
+}
+.t-desc {
+  display: block;
+  margin-top: 10rpx;
+  color: #8D8FA3;
+  font-size: 23rpx;
+  line-height: 1.45;
+}

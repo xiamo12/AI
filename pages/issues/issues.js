@@ -11,6 +11,12 @@ Page({
     const issues = analysis && analysis.issues ? analysis.issues : []
     this.setData({ issues }, () => this.refreshFilters())
     this.setData({ loading: false })
+    this._setTabBarSelected(0)
+  },
+
+  _setTabBarSelected(index) {
+    const tabBar = this.selectComponent('#tab-bar')
+    tabBar && tabBar.setData({ selected: index })
   },
   refreshFilters() {
     const issues = this.data.issues
