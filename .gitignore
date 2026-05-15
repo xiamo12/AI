@@ -13,3 +13,12 @@ dist/
 build/
 coverage/
 .hermes/
+
+# 113MB 独立 SVM 检测服务，小程序不依赖
+ai-detector/
+
+# Claude Code 配置文件（本地私有）
+.claude/
+
+# 微信开发者工具私有配置
+project.private.config.json
