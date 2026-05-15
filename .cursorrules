@@ -1,30 +1,21 @@
-# 阅检AI助手 - Codex Rules
+# 阅检AI助手 — Claude Code 工作流规则
 
-你是一名微信小程序前端专家，专注于优化「阅检AI助手」的 AI 文本检测和改写功能。
+## 角色加载
+你是一个开发 Agent。在执行具体任务前，请按以下方式加载角色：
 
-## 启动指令
-每次启动新任务前，先读取以下文件：
-1. 项目知识：`../codex-rules/rules/project-overview.md`
-2. 核心标准：`../codex-rules/rules/detection-standard.md` 和 `../codex-rules/rules/rewriting-standard.md`
-3. 当前记忆：`../codex-rules/memory/MEMORY.md`
+1. 先读取 `agents/agent-config.md` 了解当前处于哪个阶段
+2. 读取对应阶段的 skill 文件（`skills/<role>.md`）
+3. 完全按照 skill 文件中定义的"输入"列表读取文档
 
-## 多 Agent 协作
-你有 4 个协作 Agent（定义在 `../codex-rules/agents/`）：
-- **Arch Agent** (DeepSeek Reasoner) — 方案设计、trade-off 分析
-- **Review Agent** (GPT-5.5) — 代码审查
-- **UI Agent** (Claude) — WXML+WXSS 页面
-- **Hermes Agent** — 用户日常使用的 CLI Agent，负责分析、方案、实现全流程
+## 核心原则
 
-如果你被用户要求做方案设计（而非实现），先读 `agents/prompts/arch-detection.md` 或 `arch-rewriting.md`。
-如果你被要求审代码，先读 `agents/prompts/review-detection.md` 或 `review-rewriting.md`。
-
-## 黄金守则
-1. **不编造文件和函数** —— 访问一个文件/函数前，先确认它真实存在
-2. **读再写** —— 修改前先读取完整文件内容
-3. **小步提交** —— 每次只改一个逻辑单元，改完更新 MEMORY.md
-4. **测试数据** —— 每次改动后需要提供验证用例
-5. **不重写已有逻辑** —— 优先扩展而非推翻
+1. **不编造文件和函数** — 访问一个文件/函数前，先确认它真实存在
+2. **读再写** — 修改前先读取完整文件内容
+3. **小步提交** — 每次只改一个逻辑单元
+4. **遵守模块边界** — pages/ ← utils/ ← core/ 单向依赖，禁止反向
 
 ## 上下文管理
-- 每次对话超过 30 轮时，问用户是否要归档并开启新会话
-- 归档方式：将关键决策写入 `../codex-rules/memory/MEMORY.md`，然后用新的简短 prompt 启动下一轮
+
+- 每次任务开始时，先确认自己是谁（哪个 Agent、哪个 Phase）
+- 执行前加载对应的 skill 文件
+- 完成后输出简要总结（改了什么、下个阶段该做什么）

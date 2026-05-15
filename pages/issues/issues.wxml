@@ -30,14 +30,15 @@
         <view wx:for="{{filteredIssues}}" wx:key="id" class="issue-card">
           <view class="issue-head">
             <text class="issue-badge {{item.riskClass}}">{{item.risk}}</text>
-            <text class="issue-score">相似度 {{item.score}}%</text>
+            <text class="issue-score">{{item.type === 'consistency' ? '评分' : '相似度'}} {{item.score}}%</text>
           </view>
-          <text class="issue-text">{{item.text}}</text>
+          <text wx:if="{{item.text}}" class="issue-text">{{item.text}}</text>
+          <view wx:if="{{item.type === 'consistency'}}" class="issue-type-badge">{{item.labels[0]}}</view>
           <view class="issue-field">
             <text class="field-label">问题：</text>
             <text>{{item.problem}}</text>
           </view>
-          <view class="issue-field">
+          <view wx:if="{{item.suggestion}}" class="issue-field">
             <text class="field-label">建议：</text>
             <text>{{item.suggestion}}</text>
           </view>

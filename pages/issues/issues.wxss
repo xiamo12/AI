@@ -189,6 +189,18 @@
   font-weight: 700;
 }
 
+/* ===== v2.0 逻辑问题类型标识 ===== */
+.issue-type-badge {
+  display: inline-block;
+  margin-top: 20rpx;
+  padding: 6rpx 20rpx;
+  border-radius: 12rpx;
+  background: #FFF7ED;
+  color: #EA580C;
+  font-size: 22rpx;
+  font-weight: 700;
+}
+
 /* ===== 空状态 ===== */
 .empty-card {
   padding: 80rpx 30rpx;

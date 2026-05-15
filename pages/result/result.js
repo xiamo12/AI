@@ -1,11 +1,11 @@
 const { STORAGE_KEYS, analyzeArticle, buildHistoryRecord, saveHistory } = require('../../utils/aiTextEngine')
 
 const SCALE_LABELS = [
-  { label: '高痕迹', key: 'high' },
-  { label: '较明显', key: 'apparent' },
-  { label: '一般', key: 'medium' },
-  { label: '较低', key: 'low' },
   { label: '很低', key: 'lowest' },
+  { label: '较低', key: 'low' },
+  { label: '一般', key: 'medium' },
+  { label: '较明显', key: 'apparent' },
+  { label: '高痕迹', key: 'high' },
 ]
 
 Page({
@@ -59,7 +59,9 @@ Page({
       '较低': 'AI痕迹较低',
       '极低': 'AI痕迹极低',
     }
-    const riskLabel = labelMap[riskText] || 'AI痕迹一般'
+    // 用融合后的score重新计算riskText，确保跟进度条一致
+    const scoreRiskText = score >= 85 ? '极高频' : score >= 70 ? '高频' : score >= 50 ? '严重' : score >= 30 ? '一般' : score >= 10 ? '较低' : '极低'
+    const riskLabel = labelMap[scoreRiskText] || 'AI痕迹一般'
 
     const sourceList = analysis.sourceAnalysis || []
     const displayIssues = sourceList.map((item, idx) => {
@@ -85,11 +87,11 @@ Page({
 
   _computeActiveLabels(score) {
     let activeIndex
-    if (score >= 80) activeIndex = 0
-    else if (score >= 60) activeIndex = 1
+    if (score >= 80) activeIndex = 4
+    else if (score >= 60) activeIndex = 3
     else if (score >= 40) activeIndex = 2
-    else if (score >= 20) activeIndex = 3
-    else activeIndex = 4
+    else if (score >= 20) activeIndex = 1
+    else activeIndex = 0
     return SCALE_LABELS.map((item, i) => ({
       ...item,
       active: i === activeIndex,

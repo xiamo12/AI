@@ -1,28 +1,33 @@
-<scroll-view class="page" scroll-y type="list">
-  <!-- 顶部紫粉渐变 -->
+<view class="page-wrap">
+  <!-- 顶部紫粉渐变（固定） -->
   <view class="top-banner page-banner">
     <view class="clear-action" bindtap="clearHistory"><text>🗑️</text><text>一键清空</text></view>
   </view>
 
-  <!-- 主卡片内容区 -->
-  <view class="main-card">
-    <view wx:if="{{records.length}}">
-      <view wx:for="{{records}}" wx:key="id" data-index="{{index}}" bindtap="openRecord" class="record-card">
-        <view class="record-icon">▤</view>
-        <view class="record-info">
-          <text class="record-title">{{item.title}}</text>
-          <text class="record-meta">字数：{{item.wordCount}}　{{item.time}}</text>
-        </view>
-        <view class="record-tags">
-          <text class="tag-status status-detect">检测完成</text>
-          <text class="tag-score">AI {{item.score}}%</text>
+  <!-- 记录列表（可滚动，在顶部和底部之间） -->
+  <scroll-view class="list-scroll" scroll-y>
+    <view class="main-card">
+      <view wx:if="{{records.length}}">
+        <view wx:for="{{records}}" wx:key="id" data-index="{{index}}" bindtap="openRecord" class="record-card">
+          <view class="record-icon">▤</view>
+          <view class="record-info">
+            <text class="record-title">{{item.title}}</text>
+            <text class="record-meta">字数：{{item.wordCount}}　{{item.time}}</text>
+          </view>
+          <view class="record-tags">
+            <text class="tag-status status-detect">检测完成</text>
+            <text class="tag-score">AI {{item.score}}%</text>
+          </view>
         </view>
       </view>
+      <view wx:else class="empty-block">
+        <text class="empty-title">还没有历史记录</text>
+        <text class="empty-desc">完成检测后会自动保存在这里。</text>
+      </view>
     </view>
-    <view wx:else class="empty-block">
-      <text class="empty-title">还没有历史记录</text>
-      <text class="empty-desc">完成检测后会自动保存在这里。</text>
-    </view>
-  </view>
-  <view class="bottom-spacer"></view>
-</scroll-view>
+    <view class="scroll-bottom-spacer"></view>
+  </scroll-view>
+
+  <!-- 底部 tab 切换 -->
+  <tab-bar id="tab-bar"></tab-bar>
+</view>

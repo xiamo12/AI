@@ -1,69 +1,99 @@
-# 阅检AI助手 — Agent 配置与职责
+# 阅检AI助手 — Agent 工作流配置
 
-> 版本：v1.0 | 日期：2025-05-11
+> 版本：v2.0 | 日期：2026-05-14
 
 ---
 
-## 1. Agent 职责矩阵
+## 5 阶段工作流
 
-| Agent | 文档输入 | 文档输出 | 工作目录 | 修改范围 |
-|-------|---------|---------|---------|---------|
-| PM | 用户需求 | PRD，页面流程 | docs/prd/, docs/flow/ | 仅文档 |
-| Architect | PRD | 架构设计，ADR | docs/architecture.md | 仅架构文档 |
-| Frontend | PRD + 架构 | 页面代码 | pages/ | 页面层 + wxml/wxss |
-| Backend | PRD + 架构 | API代码 | server/ (Phase 2) | 后端代码 |
-| Prompt Engineer | 架构 | Prompt文件 | core/prompts/ | prompt 文件 |
-| Review | 所有 | review-report.md | — | 仅产生报告 |
-| Test | 模块代码 | 测试文件 | core/*/__tests__/ | 测试文件 |
-| Refactor | 模块代码 | 重构后代码 | core/ | 核心模块 |
-
-## 2. Agent 通信规则
+每个阶段由一个独立的 Agent 执行，启动时只加载自己的 skill 文件，**不保留上游的原始对话上下文**。
 
 ```
-PM ──→ Architect ──→ Frontend
-                  └──→ Backend
-                  └──→ Prompt Engineer
-                         └──→ Test
-Review ──→ (所有 Agent)
-Refactor ──→ (定期触发)
+用户需求
+   │
+   ▼
+┌────────────────────────────────────────────────────────┐
+│ Phase 1: PM Agent                                      │
+│ Skill → skills/prd-writing.md                          │
+│ 输出: docs/prd/PRD-v1.md                               │
+│ 上下文: 仅读 skills/prd-writing.md + docs/prd/          │
+└────────────────────┬───────────────────────────────────┘
+                     │ PRD 文档
+                     ▼
+┌────────────────────────────────────────────────────────┐
+│ Phase 2: Architect Agent                               │
+│ Skill → skills/architecture-design.md                  │
+│ 输入: docs/prd/PRD-v1.md                               │
+│ 输出: docs/architecture.md                             │
+│ 上下文: 读 PRD + 现有架构 + 受影响的模块代码            │
+└────────────────────┬───────────────────────────────────┘
+                     │ 架构文档
+                     ▼
+┌────────────────────────────────────────────────────────┐
+│ Phase 3: Frontend Agent                                │
+│ Skill → skills/ui-development.md                       │
+│ 输入: docs/architecture.md                             │
+│ 输出: pages/, utils/ 代码                              │
+│ 上下文: 读 PRD + 架构 + skills/development-workflow.md  │
+└────────────────────┬───────────────────────────────────┘
+                     │ 代码
+                     ▼
+┌────────────────────────────────────────────────────────┐
+│ Phase 4: Review Agent                                  │
+│ Skill → skills/code-review.md                          │
+│ 输入: git diff 或文件变更列表                           │
+│ 输出: 审查报告（文本输出，不写文件）                    │
+│ 上下文: 读架构 + 变更文件 + development-workflow        │
+└────────────────────┬───────────────────────────────────┘
+                     │ 审查报告
+                     ▼
+┌────────────────────────────────────────────────────────┐
+│ Phase 5: Test Agent                                    │
+│ Skill → skills/testing.md                              │
+│ 输入: 被测试模块的源代码                               │
+│ 输出: tests/ 测试文件                                  │
+│ 上下文: 读测试 skill + 被测试模块代码 + 架构           │
+└────────────────────────────────────────────────────────┘
 ```
 
-- 下游 Agent 依赖上游 Agent 的产出
-- 同层 Agent（Frontend / Backend / Prompt Engineer）可并行
-- Review Agent 在所有开发完成后执行
-- Refactor Agent 独立周期触发，不依赖其他 Agent
+## 上下文隔离规则
 
-## 3. Agent 启动检查清单
+| 规则 | 说明 |
+|------|------|
+| **单一 skill 加载** | 每个 Agent 启动时只加载自己的 skill 文件，不加载无关 skill |
+| **最小文档读取** | 按上表规定的"输入"列读取，不多读 |
+| **文档即契约** | Phase 1 的输出（PRD）是 Phase 2 的唯一输入；Phase 2 的输出（架构）是 Phase 3 的唯一输入 |
+| **禁止读取非职责文件** | PM Agent 不读代码，Frontend Agent 不读测试文件，Review Agent 不修改代码 |
+| **上限控制** | 单个 skill 文件不超过 80 行，架构文档不超过 150 行 |
 
-每个 Agent 启动时检查：
+## 启动命令
 
-- [ ] 是否读取了 architecture.md？
-- [ ] 是否读取了 PRD？
-- [ ] 修改范围是否在自己的职责内？
-- [ ] 是否读取了目标模块的现有代码？
-- [ ] 是否加载了 skills/development-workflow.md？
+在 Claude Code 中启动各阶段的命令：
 
-## 4. 跨 Agent 协作示例
+```bash
+# Phase 1: 编写 PRD
+> 按照 skills/prd-writing.md 的要求，与用户确认需求后编写 PRD
 
-### 场景：新增一个检测维度
+# Phase 2: 设计架构
+> 按照 skills/architecture-design.md 的要求，基于 PRD 更新架构文档
 
-1. PM Agent：更新 PRD → 新增检测维度说明
-2. Architect Agent：评估模块边界，决定放入哪个 core/ 模块
-3. Prompt Engineer Agent：如果涉及 AI 分析，新增 prompt
-4. Frontend Agent：在检测结果页展示新维度
-5. Test Agent：为新增逻辑编写测试
-6. Review Agent：review 所有变更
+# Phase 3: 开发页面
+> 按照 skills/ui-development.md 的要求，基于架构文档实现代码
 
-### 场景：修改提示词
+# Phase 4: 审查代码
+> 按照 skills/code-review.md 的要求，审查变更
 
-1. Prompt Engineer Agent：修改 core/prompts/ 下对应文件
-2. 更新文件头版本号
-3. Test Agent：验证 prompt 输出符合预期
-4. Review Agent：review prompt 质量
+# Phase 5: 编写测试
+> 按照 skills/testing.md 的要求，为模块编写测试
+```
 
-## 5. Context 保护规则
+## 技能文件索引
 
-- 单次任务不扫描超过 5 个文件
-- 读文件从 `architecture.md` 开始，而非全项目
-- 超过 500 行文件只读关键区段
-- 优先读取 skills/ 中的工作流规范
+| 文件 | 用途 |
+|------|------|
+| `skills/prd-writing.md` | PM Agent — 产品需求文档写作 |
+| `skills/architecture-design.md` | Architect Agent — 架构文档设计 |
+| `skills/ui-development.md` | Frontend Agent — UI 开发 |
+| `skills/code-review.md` | Review Agent — 代码审查 |
+| `skills/testing.md` | Test Agent — 测试编写 |
+| `skills/development-workflow.md` | 通用开发流程规范 |

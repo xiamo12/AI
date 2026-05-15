@@ -4,6 +4,7 @@
 
 const localDetector = require('./aiDetector')
 const { analyzeSemantic } = require('./aiSemanticDetector')
+const { analyzeConsistency } = require('./aiSemanticConsistency')
 const { clamp, normalizeText, splitSentences } = require('./util')
 
 // ============================================================
@@ -40,6 +41,26 @@ const templatePhrases = [
   '在…背景下', '从…视角出发', '以…为导向',
   '值得注意的是', '需要强调的是',
   '与此同时，我们也应该看到',
+
+  // ---- v2.0 论文/学术场景 ----
+  '相关研究表明', '文献综述表明', '已有研究指出', '现有文献表明',
+  '学术界普遍认为', '主流观点认为', '从学术角度来看',
+  '理论框架', '研究方法', '实证分析', '定量研究', '定性分析',
+  '研究局限性', '未来研究方向', '尚存争议',
+
+  // ---- v2.0 公众号/营销场景 ----
+  '改变你的一生', '彻底改变', '颠覆认知', '认知升级',
+  '深度好文', '建议收藏', '值得收藏', '转给需要的人',
+  '你一定要看', '别让…', '为什么…', '如何做到',
+  '人生的真相', '普通人也能', '从零开始',
+  '最可怕的是', '最让人震惊的是', '令人震惊的是',
+  '在这个浮躁的时代', '在这个快节奏的时代',
+
+  // ---- v2.0 小红书场景 ----
+  '谁懂啊', '我真的会谢', '绝绝子', '给我冲',
+  '真的太好用了', '按头安利', '不允许你不知道',
+  '姐妹们冲', '闭眼入', '挖到宝了', '无限回购',
+  '建议收藏', '干货满满', '保姆级教程',
 ]
 
 const aiFlavorPatterns = [
@@ -126,6 +147,27 @@ const aiFlavorPatterns = [
   { label: '这大概就是…的意义', regex: /这大概就是[^。！？；;\n]{1,30}的(?:意义|价值|魅力|真谛)/g, weight: 5, type: '升华模板' },
   // "在…的今天"
   { label: '在…的今天', regex: /在[^。！？；;\n]{1,28}的今天[，,]?/g, weight: 4, type: '时间套话' },
+
+  // ---- v2.0 论文场景新增 ----
+  { label: '文献表明/研究表明/有学者指出', regex: /(?:文献|研究|数据|调查|报告|实验)[^。！？；;\n]{0,8}(?:表明|显示|指出|证明|发现)/g, weight: 5, type: '学术套话' },
+  { label: '引发了学术界的广泛关注', regex: /引发了[^。！？；;\n]{1,20}(?:学术|业界|社会)界的(?:广泛|极大|诸多)(?:关注|讨论)/g, weight: 5, type: '学术套话' },
+  { label: '存在…的问题/不足/争议', regex: /存在[^。！？；;\n]{1,24}(?:问题|不足|争议|缺陷|局限|挑战)/g, weight: 4, type: '学术套话' },
+  { label: '具有重要的理论意义和实践价值', regex: /具有(?:重要|深远|显著)[^。！？；;\n]{1,20}(?:理论|实践|现实)(?:意义|价值)/g, weight: 6, type: '学术模板' },
+  { label: '有待进一步研究/深入探讨', regex: /有待(?:进一步|深入)(?:研究|探讨|探索|分析)/g, weight: 4, type: '学术结尾' },
+
+  // ---- v2.0 公众号/营销场景新增 ----
+  { label: '你一定要知道/你必须了解', regex: /你(?:一定|千万|务必)(?:要|得|需要)[^。！？；;\n]{1,20}(?:知道|了解|记住|学会)/g, weight: 6, type: '营销口吻' },
+  { label: '月入过万/轻松赚钱/财富自由', regex: /(?:月入|年入|轻松赚|暴富|财富自由)/g, weight: 5, type: '营销话术' },
+  { label: '看完你就懂了/学会了/明白了', regex: /看完[^。！？；;\n]{0,8}(?:就|便|自然|一定)(?:懂|学会|明白|知道)/g, weight: 5, type: '营销引导' },
+  { label: '很多人不知道的是', regex: /很多人不(?:知道|了解|清楚)[^。！？；;\n]{0,4}的是/g, weight: 5, type: '悬念开头' },
+  { label: '你一定要读完/一定看到最后', regex: /你(?:一定|千万)(?:要读完|要看完|看到最后|读到最后)/g, weight: 4, type: '营销引导' },
+
+  // ---- v2.0 小红书场景新增 ----
+  { label: '谁懂啊/谁懂这种感觉', regex: /谁懂[啊吧]|谁懂这种感觉/g, weight: 4, type: '小红书感叹' },
+  { label: '救命/绝了/封神了', regex: /(?:救命|绝了|封神了|太上头了|破防了)/g, weight: 3, type: '小红书感叹' },
+  { label: '建议所有…都去…', regex: /建议所有[^。！？；;\n]{1,20}都[^。！？；;\n]{1,20}/g, weight: 5, type: '小红书模板' },
+  { label: '不允许还有人不知道', regex: /不允许还(?:有|有人)[^。！？；;\n]{0,4}不(?:知道|了解)/g, weight: 4, type: '小红书句式' },
+  { label: '小个子/梨形/黄黑皮', regex: /(?:小个子|梨形身材|苹果型|黄黑皮|干皮|油皮|敏感肌)/g, weight: 2, type: '小红书标签' },
 ]
 
 const concretePatterns = [
@@ -657,6 +699,35 @@ function analyzeArticle(text, options = {}) {
   }
 
   // ============================================================
+  // v2.0: 上下文语义一致性检测（段落断层/观点矛盾/论据重复）
+  // ============================================================
+  let consistencyAnalysis = null
+  if (paragraphsText.length >= 2) {
+    try {
+      consistencyAnalysis = analyzeConsistency(normalized)
+      if (consistencyAnalysis.score > 30) {
+        score += Math.min(6, Math.round(consistencyAnalysis.score * 0.06))
+      }
+    } catch (e) {
+      consistencyAnalysis = null
+    }
+  }
+
+  // ============================================================
+  // v2.0: 场景检测权重增强
+  // ============================================================
+  const SCENE_BOOST = {
+    '论文/作业': { patternsMul: 1.3, templateMul: 1.2 },
+    '公众号文章': { patternsMul: 1.2, templateMul: 1.3 },
+    '小红书笔记': { patternsMul: 1.1, templateMul: 1.4 },
+  }
+  const sceneBoost = SCENE_BOOST[userType]
+  if (sceneBoost && wholeHits.score > 0) {
+    const boost = wholeHits.score * (sceneBoost.patternsMul - 1) * 0.5
+    score += Math.min(8, Math.round(boost))
+  }
+
+  // ============================================================
   // v3.0: 本地检测器融合（降低权重，减少误判）
   // ============================================================
   let localDetection = null
@@ -766,6 +837,32 @@ function analyzeArticle(text, options = {}) {
       })
     }
   }
+  // v2.0: 语义一致性分析
+  let consistencyIssues = []
+  if (consistencyAnalysis && consistencyAnalysis.issues.length > 0) {
+    consistencyIssues = consistencyAnalysis.issues.map((item, idx) => ({
+      id: `consistency-${idx}`,
+      type: 'consistency',
+      paragraphIndex: item.fromParagraph - 1,
+      order: idx + 1,
+      text: '',
+      score: consistencyAnalysis.score,
+      labels: [item.type === 'semantic_gap' ? '语义断层' : item.type === 'contradiction' ? '观点矛盾' : '论据重复'],
+      risk: item.severity === 'high' ? '高风险' : '中风险',
+      riskClass: item.severity,
+      riskRank: item.severity === 'high' ? 3 : 2,
+      problem: item.desc,
+      suggestion: '',
+      expanded: false,
+    }))
+    sourceAnalysis.push({
+      title: '语义连贯性不足',
+      desc: `存在 ${consistencyAnalysis.issues.length} 处语义一致性问题（断层 ${consistencyAnalysis.gapCount} 处、矛盾 ${consistencyAnalysis.contradictionCount} 处、重复 ${consistencyAnalysis.redundancyCount} 处）。`,
+      count: consistencyAnalysis.issues.length,
+      riskClass: consistencyAnalysis.score > 40 ? 'high' : 'medium',
+    })
+  }
+
   if (!issues.length && sourceAnalysis.length && paragraphs.length) {
     const paragraph = paragraphs[0]
     const fallbackSentence = splitSentences(paragraph.text)[0] || paragraph.text
@@ -797,6 +894,9 @@ function analyzeArticle(text, options = {}) {
   if (wordCount > 150 && trigramRepeatRatio > 0.22) reasons.push(`字符序列复现率偏高（${(trigramRepeatRatio * 100).toFixed(1)}%）`)
   // v2.1: 词级 N-gram 重复提示
   if (wordCount > 100 && wordBigramRepeat > 0.28) reasons.push(`词级短语结构重复率偏高（${(wordBigramRepeat * 100).toFixed(1)}%）`)
+  // v2.0: 语义一致性提示
+  if (consistencyAnalysis && consistencyAnalysis.gapCount > 0) reasons.push(`存在 ${consistencyAnalysis.gapCount} 处语义断层`)
+  if (consistencyAnalysis && consistencyAnalysis.contradictionCount > 0) reasons.push(`存在 ${consistencyAnalysis.contradictionCount} 处观点矛盾`)
   if (!reasons.length) reasons.push('未发现明显高频AI句式，建议继续人工复核')
 
   // v2.0: 置信度增强估计
@@ -830,9 +930,16 @@ function analyzeArticle(text, options = {}) {
     aiFlavorDetails: wholeHits.details.slice(0, 8),
     sourceAnalysis,
     paragraphs,
-    issues,
+    issues: consistencyIssues.length ? issues.concat(consistencyIssues) : issues,
     highRiskSentences: issues.slice(0, 8),
     reasons,
+    semanticConsistency: consistencyAnalysis ? {
+      score: consistencyAnalysis.score,
+      gapCount: consistencyAnalysis.gapCount,
+      contradictionCount: consistencyAnalysis.contradictionCount,
+      redundancyCount: consistencyAnalysis.redundancyCount,
+      issues: consistencyIssues.slice(0, 10),
+    } : null,
     // v2.0 扩展: 新增检测元数据
     featureDetails: {
       functionWordRatio: Number((functionWordRatio * 100).toFixed(1)),

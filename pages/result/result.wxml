@@ -34,6 +34,13 @@
       </view>
     </view>
 
+    <!-- SVM 融合标识 -->
+    <view wx:if="{{analysis.fusionWeight}}" class="svm-badge">
+      <text class="svm-icon">⚡</text>
+      <text class="svm-text">融合检测 {{analysis.fusionWeight}}</text>
+      <text wx:if="{{analysis.svmVerdict}}" class="svm-vote">{{analysis.svmVerdict === 'ai' ? 'AI判定' : analysis.svmVerdict === 'human' ? '人类判定' : '边界判定'}}</text>
+    </view>
+
     <!-- AI痕迹分析列表 -->
     <view class="analysis-section">
       <view class="section-title">AI痕迹分析 <text class="count">共{{displayIssues.length}}项</text></view>
@@ -49,6 +56,30 @@
           <view class="issue-tag {{item.levelClass}}">{{item.level}}</view>
         </view>
       </scroll-view>
+    </view>
+
+    <!-- v2.0 语义一致性卡片 -->
+    <view wx:if="{{analysis.semanticConsistency}}" class="consistency-section">
+      <view class="section-title">
+        语义连贯性
+        <text class="count">
+          {{analysis.semanticConsistency.gapCount > 0 || analysis.semanticConsistency.contradictionCount > 0 ? '发现问题' : '良好'}}
+        </text>
+      </view>
+      <view class="consistency-grid">
+        <view class="consistency-item {{analysis.semanticConsistency.gapCount > 0 ? 'warn' : ''}}">
+          <view class="consistency-label">语义断层</view>
+          <view class="consistency-val">{{analysis.semanticConsistency.gapCount}}处</view>
+        </view>
+        <view class="consistency-item {{analysis.semanticConsistency.contradictionCount > 0 ? 'warn' : ''}}">
+          <view class="consistency-label">观点矛盾</view>
+          <view class="consistency-val">{{analysis.semanticConsistency.contradictionCount}}处</view>
+        </view>
+        <view class="consistency-item {{analysis.semanticConsistency.redundancyCount > 0 ? 'warn' : ''}}">
+          <view class="consistency-label">论据重复</view>
+          <view class="consistency-val">{{analysis.semanticConsistency.redundancyCount}}处</view>
+        </view>
+      </view>
     </view>
 
     <!-- 底部操作按钮 -->

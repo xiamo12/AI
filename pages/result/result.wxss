@@ -52,7 +52,7 @@
 
 /* ===== 分数展示卡片（玻璃拟态） ===== */
 .score-card {
-  margin: -60rpx 40rpx 0;
+  margin: 0rpx 40rpx 0;
   background: rgba(255, 255, 255, 0.92);
   border-radius: 40rpx;
   padding: 60rpx 0;
@@ -91,12 +91,12 @@
 
 /* ===== 刻度进度条 ===== */
 .scale-container {
-  margin: 48rpx 40rpx 0;
+  margin: 28rpx 40rpx 0;
 }
 .scale-bar {
   height: 12rpx;
   border-radius: 6rpx;
-  background: linear-gradient(to right, #FF4D4D, #FF9F43, #FFDB5C, #4CD964, #2ECC71);
+  background: linear-gradient(to right, #2ECC71, #4CD964, #FFDB5C, #FF9F43, #FF4D4D);
   position: relative;
 }
 .indicator {
@@ -134,6 +134,35 @@
   font-size: 24rpx;
 }
 
+/* ===== SVM 融合标识 ===== */
+.svm-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8rpx;
+  margin: 16rpx 20rpx 0;
+  padding: 14rpx 20rpx;
+  background: #F3F0FF;
+  border-radius: 16rpx;
+  border: 2rpx solid #E8E0FF;
+}
+.svm-icon {
+  font-size: 28rpx;
+}
+.svm-text {
+  font-size: 22rpx;
+  color: #6D5CFF;
+  font-weight: 600;
+}
+.svm-vote {
+  font-size: 20rpx;
+  color: #8B7AFF;
+  background: rgba(109,92,255,0.1);
+  padding: 4rpx 12rpx;
+  border-radius: 10rpx;
+  margin-left: 4rpx;
+}
+
 /* ===== 返回按钮 ===== */
 .back-btn {
   position: fixed;
@@ -153,10 +182,46 @@
   background: rgba(255, 255, 255, 0.35);
 }
 
+/* ===== v2.0 语义一致性卡片 ===== */
+.consistency-section {
+  margin: 20rpx 32rpx 0;
+  padding-bottom: 165rpx;
+}
+.consistency-grid {
+  display: flex;
+  gap: 16rpx;
+  margin-bottom: 20rpx;
+}
+.consistency-item {
+  flex: 1;
+  background: #FFFFFF;
+  border-radius: 24rpx;
+  padding: 24rpx 16rpx;
+  text-align: center;
+  box-shadow: 0 4rpx 12rpx rgba(106, 90, 224, 0.06);
+}
+.consistency-item.warn {
+  background: #FFFBEB;
+  border: 2rpx solid #FDE68A;
+}
+.consistency-label {
+  font-size: 22rpx;
+  color: #9CA0B4;
+}
+.consistency-val {
+  font-size: 34rpx;
+  font-weight: 800;
+  color: #1A1C3D;
+  margin-top: 10rpx;
+}
+.consistency-item.warn .consistency-val {
+  color: #F59E0B;
+}
+
 /* ===== 底部操作按钮（固定窗口底部） ===== */
 .btn-area {
   position: fixed;
-  bottom: 120rpx;
+  bottom: 90rpx;
   left: 0;
   right: 0;
   z-index: 100;
@@ -197,18 +262,18 @@
 
 /* ===== AI痕迹分析列表 ===== */
 .analysis-section {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
   margin: 10px 32rpx 0;
   overflow: hidden;
-  padding-bottom: 260rpx;
+  padding-bottom: 16rpx;
 }
 .analysis-scroll {
-  flex: 1;
+  max-height: calc(100vh - 760rpx);
   overflow-y: scroll;
+  padding-bottom: 10rpx;
 }
 .section-title {
+  display: flex;
+  align-items: center;
   font-size: 30rpx;
   font-weight: 700;
   color: #1A1C3D;
@@ -219,6 +284,7 @@
   font-weight: 400;
   color: #9CA0B4;
   margin-left: 12rpx;
+  line-height: 8rpx;
 }
 
 .issue-item {

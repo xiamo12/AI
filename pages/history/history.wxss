@@ -1,5 +1,15 @@
-/* ===== 顶部渐变头 ===== */
-.page-banner {
+/* ===== 页面布局：全屏固定，顶部/底部固定，中间滚动 ===== */
+.page-wrap {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: #F6F7FB;
+  overflow: hidden;
+}
+
+/* ===== 顶部渐变头（固定位置） ===== */
+.top-banner {
+  flex-shrink: 0;
   height: 256rpx;
   background: linear-gradient(135deg, #5B5CFF 0%, #8A3CFF 50%, #FF4FCB 100%);
   position: relative;
@@ -31,6 +41,13 @@
 .clear-action:active {
   background: rgba(255, 255, 255, 0.5);
   transform: scale(0.96);
+}
+
+/* ===== 记录列表（可滚动区域） ===== */
+.list-scroll {
+  flex: 1;
+  overflow-y: scroll;
+  -webkit-overflow-scrolling: touch;
 }
 
 /* ===== 主卡片区（同首页） ===== */
@@ -126,4 +143,9 @@
   margin-top: 14rpx;
   color: #8D8FA3;
   font-size: 24rpx;
+}
+
+/* ===== 底部安全区（防止tab-bar遮挡最后一条记录） ===== */
+.scroll-bottom-spacer {
+  height: 180rpx;
 }
