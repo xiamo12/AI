@@ -5,6 +5,8 @@ const articleTypes = [
   { icon: '□', name: '论文/作业', nameShort: '论文/毕业' },
   { icon: '✎', name: '公众号文章', nameShort: '公众号' },
   { icon: '✦', name: '小红书笔记', nameShort: '小红书' },
+  { icon: '▶', name: '口播脚本', nameShort: '口播' },
+  { icon: '▣', name: '职场文档', nameShort: '职场' },
 ]
 
 Page({
@@ -22,13 +24,7 @@ Page({
     this.setTabBarSelected(0)
     const presetScene = wx.getStorageSync('preset_scene')
     if (presetScene) {
-      const sceneAlias = {
-        公众号: '公众号文章',
-        小红书: '小红书笔记',
-        论文: '论文/作业',
-      }
-      const sceneName = sceneAlias[presetScene] || presetScene
-      const idx = articleTypes.findIndex((t) => t.name === sceneName)
+      const idx = articleTypes.findIndex((t) => t.name === presetScene)
       if (idx >= 0) {
         this.setData({ typeIndex: idx })
       }
@@ -52,10 +48,6 @@ Page({
 
   clearText() {
     this.setData({ articleText: '' })
-  },
-
-  goTemplates() {
-    wx.switchTab({ url: '/pages/templates/templates' })
   },
 
   pasteText() {

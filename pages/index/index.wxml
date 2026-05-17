@@ -28,10 +28,9 @@
       </view>
 
       <view class="template-section">
-        <view class="template-header">
-          <text class="template-title">选择文本类型</text>
-          <text class="more-template" bindtap="goTemplates">写作模板 ></text>
-        </view>
+      <view class="template-header">
+        <text class="template-title">选择文本类型</text>
+      </view>
         <view class="template-grid">
           <view wx:for="{{articleTypes}}" wx:key="name" data-index="{{index}}" bindtap="selectType" class="template-card {{typeIndex === index ? 'active' : ''}}">
             <text class="t-icon">{{item.icon}}</text>

@@ -103,6 +103,28 @@
   color: #8D8FA3;
   font-size: 22rpx;
 }
+.record-meta-row {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  margin-top: 8rpx;
+}
+.record-meta-row .tag-type {
+  font-size: 20rpx;
+  height: 34rpx;
+  line-height: 34rpx;
+  padding: 0 12rpx;
+  border-radius: 8rpx;
+  background: #E8F4FD;
+  color: #3B82F6;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+.record-meta-row .record-meta {
+  margin-top: 0;
+  font-size: 22rpx;
+  color: #8D8FA3;
+}
 .record-tags {
   display: flex;
   flex-direction: column;
@@ -110,7 +132,7 @@
   gap: 6rpx;
   flex-shrink: 0;
 }
-.tag-status, .tag-score {
+.tag-status, .tag-score, .tag-type {
   height: 40rpx;
   padding: 0 14rpx;
   border-radius: 10rpx;
@@ -125,6 +147,10 @@
 .tag-score {
   background: #F5F6FB;
   color: #555770;
+}
+.tag-type {
+  background: #E8F4FD;
+  color: #3B82F6;
 }
 
 /* ===== 空状态 ===== */

@@ -6,7 +6,7 @@ Page({
   },
 
   onShow() {
-    this.setTabBarSelected(3)
+    this.setTabBarSelected(2)
     const list = readHistory()
     this.setData({ total: list.length })
   },
@@ -14,6 +14,10 @@ Page({
   goLegal(event) {
     const type = event.currentTarget.dataset.type || 'privacy'
     wx.navigateTo({ url: `/pages/legal/legal?type=${type}` })
+  },
+
+  goHistory() {
+    wx.switchTab({ url: '/pages/history/history' })
   },
 
   onClearHistory() {

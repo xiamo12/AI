@@ -15,7 +15,7 @@
 
     <!-- 统计 -->
     <view class="stats-row">
-      <view class="stat-item">
+      <view class="stat-item" bindtap="goHistory">
         <text class="stat-num">{{total}}</text>
         <text class="stat-label">历史记录</text>
       </view>

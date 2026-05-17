@@ -4,7 +4,6 @@
     "pages/result/result",
     "pages/issues/issues",
     "pages/history/history",
-    "pages/templates/templates",
     "pages/profile/profile",
     "pages/legal/legal"
   ],
@@ -33,12 +32,6 @@
         "text": "记录",
         "iconPath": "assets/tab/history.png",
         "selectedIconPath": "assets/tab/history-active.png"
-      },
-      {
-        "pagePath": "pages/templates/templates",
-        "text": "模板",
-        "iconPath": "assets/tab/template.png",
-        "selectedIconPath": "assets/tab/template-active.png"
       },
       {
         "pagePath": "pages/profile/profile",

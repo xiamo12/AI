@@ -9,13 +9,21 @@
     <view class="main-card">
       <view wx:if="{{records.length}}">
         <view wx:for="{{records}}" wx:key="id" data-index="{{index}}" bindtap="openRecord" class="record-card">
-          <view class="record-icon">▤</view>
+          <view class="record-icon">
+            <text wx:if="{{item.scene === '公众号文章'}}">✎</text>
+            <text wx:elif="{{item.scene === '小红书笔记'}}">✦</text>
+            <text wx:elif="{{item.scene === '论文/作业'}}">□</text>
+            <text wx:else>◎</text>
+          </view>
           <view class="record-info">
             <text class="record-title">{{item.title}}</text>
-            <text class="record-meta">字数：{{item.wordCount}}　{{item.time}}</text>
+            <view class="record-meta-row">
+              <text class="tag-type">{{item.scene}}</text>
+              <text class="record-meta">字数：{{item.wordCount}}  {{item.time}}</text>
+            </view>
           </view>
           <view class="record-tags">
-            <text class="tag-status status-detect">检测完成</text>
+            <text class="tag-status status-detect">{{item.status}}</text>
             <text class="tag-score">AI {{item.score}}%</text>
           </view>
         </view>

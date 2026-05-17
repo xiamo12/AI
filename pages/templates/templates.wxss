@@ -35,6 +35,11 @@
 .template-card:active {
   transform: scale(0.96);
 }
+.template-card.active {
+  border-color: #6D5CFF;
+  background: #F5F3FF;
+  transform: scale(0.96);
+}
 .t-icon {
   color: #6D5CFF;
   font-size: 38rpx;
