@@ -5,8 +5,11 @@
     "pages/issues/issues",
     "pages/history/history",
     "pages/templates/templates",
-    "pages/profile/profile"
+    "pages/profile/profile",
+    "pages/legal/legal"
   ],
+  "__usePrivacyCheck__": true,
+  "requiredPrivateApis": ["getClipboardData", "setClipboardData"],
   "window": {
     "navigationBarTextStyle": "black",
     "navigationBarTitleText": "阅检AI助手",

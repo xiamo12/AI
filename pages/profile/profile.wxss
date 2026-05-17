@@ -97,3 +97,35 @@
   font-size: 24rpx;
   line-height: 1.5;
 }
+
+.menu-section {
+  margin-top: 24rpx;
+  padding-top: 8rpx;
+  border-top: 2rpx solid #F0F2F8;
+}
+
+.menu-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 28rpx 0;
+  border-bottom: 2rpx solid #F0F2F8;
+}
+
+.menu-item:last-child {
+  border-bottom: none;
+}
+
+.menu-label {
+  font-size: 28rpx;
+  color: #222;
+}
+
+.menu-danger .menu-label {
+  color: #e85d5d;
+}
+
+.menu-arrow {
+  font-size: 32rpx;
+  color: #c5c9d6;
+}

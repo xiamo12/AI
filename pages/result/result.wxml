@@ -19,7 +19,8 @@
     <view class="score-card">
       <view class="score-num">{{analysis.score}}<text class="unit">%</text></view>
       <view class="score-label">{{riskLabel}}</view>
-      <view class="score-desc">AI生成概率 <text class="info-icon">ⓘ</text></view>
+      <view class="score-desc">AI 痕迹参考指数 <text class="info-icon">ⓘ</text></view>
+      <view class="disclaimer">本结果由本地规则生成，仅供写作辅助参考，不构成权威鉴定。</view>
     </view>
 
     <!-- 刻度进度条 -->
@@ -32,13 +33,6 @@
           <text class="{{item.active ? 'active' : ''}}">{{item.label}}</text>
         </block>
       </view>
-    </view>
-
-    <!-- SVM 融合标识 -->
-    <view wx:if="{{analysis.fusionWeight}}" class="svm-badge">
-      <text class="svm-icon">⚡</text>
-      <text class="svm-text">融合检测 {{analysis.fusionWeight}}</text>
-      <text wx:if="{{analysis.svmVerdict}}" class="svm-vote">{{analysis.svmVerdict === 'ai' ? 'AI判定' : analysis.svmVerdict === 'human' ? '人类判定' : '边界判定'}}</text>
     </view>
 
     <!-- AI痕迹分析列表 -->

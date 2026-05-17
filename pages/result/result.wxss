@@ -83,6 +83,14 @@
   font-size: 24rpx;
   color: #9CA0B4;
 }
+.disclaimer {
+  margin: 16rpx 40rpx 0;
+  padding: 0 8rpx;
+  font-size: 22rpx;
+  line-height: 1.5;
+  color: #9ca0b4;
+  text-align: center;
+}
 .info-icon {
   font-size: 24rpx;
   vertical-align: middle;
@@ -132,35 +140,6 @@
   color: #6A5AE0;
   font-weight: 700;
   font-size: 24rpx;
-}
-
-/* ===== SVM 融合标识 ===== */
-.svm-badge {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8rpx;
-  margin: 16rpx 20rpx 0;
-  padding: 14rpx 20rpx;
-  background: #F3F0FF;
-  border-radius: 16rpx;
-  border: 2rpx solid #E8E0FF;
-}
-.svm-icon {
-  font-size: 28rpx;
-}
-.svm-text {
-  font-size: 22rpx;
-  color: #6D5CFF;
-  font-weight: 600;
-}
-.svm-vote {
-  font-size: 20rpx;
-  color: #8B7AFF;
-  background: rgba(109,92,255,0.1);
-  padding: 4rpx 12rpx;
-  border-radius: 10rpx;
-  margin-left: 4rpx;
 }
 
 /* ===== 返回按钮 ===== */

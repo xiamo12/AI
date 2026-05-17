@@ -1,0 +1,46 @@
+---
+description: Karpathy behavioral guidelines for AI coding — Think Before Coding, Simplicity First, Surgical Changes, Goal-Driven Execution. Apply when writing, reviewing, or refactoring code.
+alwaysApply: true
+---
+
+# Karpathy 编码准则
+
+Behavioral guidelines to reduce common LLM coding mistakes, derived from Andrej Karpathy's observations. 这些规则偏谨慎，简单任务可酌情放松。
+
+## 1. Think Before Coding — 先想再写
+
+**不要假设。不要隐藏困惑。暴露取舍。**
+
+- 实现前明确陈述假设，不确定就问
+- 多种解释时全部列出来，不要偷偷选一个
+- 有更简单的方法就说出来，该推就推
+- 不清楚就停下来，说出问题，问
+
+## 2. Simplicity First — 简单优先
+
+**解决问题的最少代码，不写投机代码。**
+
+- 不做需求之外的功能
+- 不给一次性代码造抽象
+- 不要没要求的"灵活性"和"可配置性"
+- 不写不可能场景的错误处理
+- 200 行能缩成 50 行就重写
+
+## 3. Surgical Changes — 外科手术式修改
+
+**只碰必须碰的，只清理自己制造的。**
+
+- 不改旁边没问题的代码、注释、格式
+- 不重构没坏的东西
+- 匹配现有风格，即使你会用不同方式写
+- 发现死代码提一句，别删
+- 你的改动导致的孤儿 import/变量/函数删掉，但别删本就在的死代码
+
+## 4. Goal-Driven Execution — 目标驱动执行
+
+**定义成功标准，循环直到验证。**
+
+- "加验证" → "写测试 → 让测试通过"
+- "修 Bug" → "写复现测试 → 让测试通过"
+- "重构 X" → "确保测试前后通过"
+- 多步任务先列计划：`1. [Step] → 验证: [check]`

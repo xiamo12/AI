@@ -6,11 +6,7 @@
       <view class="header-row">
         <view class="title-group">
           <text class="main-title">阅检</text>
-          <text class="sub-title">智能检测 · 高效阅读 · 专业助手</text>
-        </view>
-        <view class="mini-actions">
-          <view class="icon-circle" bindtap="onMore">⋮</view>
-          <view class="icon-circle" bindtap="onMiniProgram">☰</view>
+          <text class="sub-title">本地 AI 痕迹检测 · 正文不上传</text>
         </view>
       </view>
       <image class="robot-img" src="/assets/home/robot.png" mode="aspectFit"></image>
@@ -34,7 +30,7 @@
       <view class="template-section">
         <view class="template-header">
           <text class="template-title">选择文本类型</text>
-          <text class="more-template" bindtap="showMoreTypes">更多类型 ></text>
+          <text class="more-template" bindtap="goTemplates">写作模板 ></text>
         </view>
         <view class="template-grid">
           <view wx:for="{{articleTypes}}" wx:key="name" data-index="{{index}}" bindtap="selectType" class="template-card {{typeIndex === index ? 'active' : ''}}">
@@ -53,6 +49,24 @@
       <text wx:if="{{!busy}}">开始检测</text>
       <text wx:else>检测中…</text>
     </button>
-    <text class="detect-desc">分析 AI 痕迹和问题</text>
+    <text class="detect-desc">本地分析 AI 痕迹，结果仅供参考</text>
+  </view>
+
+  <!-- 粘贴前隐私授权（须使用 agreePrivacyAuthorization 按钮同步授权状态） -->
+  <view wx:if="{{showPrivacyForPaste}}" class="privacy-mask" catchtouchmove="true">
+    <view class="privacy-dialog">
+      <text class="privacy-title">使用一键粘贴</text>
+      <text class="privacy-desc">需要您同意{{privacyContractName}}。我们仅读取剪贴板内容并填入输入框，不会上传服务器。</text>
+      <view class="privacy-actions">
+        <button class="privacy-link-btn" bindtap="openPrivacyContract">查看隐私指引</button>
+        <button
+          id="privacy-agree-btn"
+          class="privacy-agree-btn"
+          open-type="agreePrivacyAuthorization"
+          bindagreeprivacyauthorization="onAgreePrivacyForPaste"
+        >同意并粘贴</button>
+        <button class="privacy-cancel-btn" bindtap="cancelPrivacyForPaste">取消</button>
+      </view>
+    </view>
   </view>
 </view>

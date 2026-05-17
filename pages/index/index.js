@@ -1,4 +1,4 @@
-const { STORAGE_KEYS, analyzeArticle, buildHistoryRecord, saveHistory } = require('../../utils/aiTextEngine')
+const { STORAGE_KEYS, runDetection, buildHistoryRecord, saveHistory } = require('../../utils/aiTextEngine')
 
 const articleTypes = [
   { icon: '◎', name: '通用文本', nameShort: '通用文本' },
@@ -14,14 +14,21 @@ Page({
     articleText: '',
     maxLength: 10000,
     busy: false,
+    showPrivacyForPaste: false,
+    privacyContractName: '《用户隐私保护指引》',
   },
 
   onShow() {
     this.setTabBarSelected(0)
-    // 读取模板页传递的预设场景
     const presetScene = wx.getStorageSync('preset_scene')
     if (presetScene) {
-      const idx = articleTypes.findIndex((t) => t.name === presetScene)
+      const sceneAlias = {
+        公众号: '公众号文章',
+        小红书: '小红书笔记',
+        论文: '论文/作业',
+      }
+      const sceneName = sceneAlias[presetScene] || presetScene
+      const idx = articleTypes.findIndex((t) => t.name === sceneName)
       if (idx >= 0) {
         this.setData({ typeIndex: idx })
       }
@@ -33,18 +40,6 @@ Page({
     if (typeof this.getTabBar === 'function' && this.getTabBar()) {
       this.getTabBar().setData({ selected: index })
     }
-  },
-
-  onMore() {
-    wx.showToast({ title: '更多功能开发中', icon: 'none' })
-  },
-
-  onMiniProgram() {
-    wx.showToast({ title: '功能开发中', icon: 'none' })
-  },
-
-  showMoreTypes() {
-    wx.showToast({ title: '更多类型开发中', icon: 'none' })
   },
 
   selectType(event) {
@@ -59,10 +54,82 @@ Page({
     this.setData({ articleText: '' })
   },
 
+  goTemplates() {
+    wx.switchTab({ url: '/pages/templates/templates' })
+  },
+
   pasteText() {
+    if (typeof wx.getPrivacySetting !== 'function') {
+      this.readClipboard()
+      return
+    }
+
+    wx.getPrivacySetting({
+      success: (res) => {
+        if (res.privacyContractName) {
+          this.setData({ privacyContractName: res.privacyContractName })
+        }
+        if (res.needAuthorization) {
+          this.setData({ showPrivacyForPaste: true })
+        } else {
+          this.readClipboard()
+        }
+      },
+      fail: () => this.readClipboard(),
+    })
+  },
+
+  openPrivacyContract() {
+    if (typeof wx.openPrivacyContract === 'function') {
+      wx.openPrivacyContract({})
+    }
+  },
+
+  cancelPrivacyForPaste() {
+    this.setData({ showPrivacyForPaste: false })
+  },
+
+  onAgreePrivacyForPaste() {
+    this.setData({ showPrivacyForPaste: false })
+    this.readClipboard()
+  },
+
+  readClipboard() {
     wx.getClipboardData({
-      success: (res) => this.setData({ articleText: res.data || '' }),
-      fail: () => wx.showToast({ title: '读取剪贴板失败', icon: 'none' }),
+      success: (res) => {
+        const text = (res.data || '').trim()
+        if (!text) {
+          wx.showToast({ title: '剪贴板为空', icon: 'none' })
+          return
+        }
+        this.setData({
+          articleText: text.slice(0, this.data.maxLength),
+        })
+        wx.showToast({ title: '已粘贴', icon: 'success' })
+      },
+      fail: (err) => {
+        console.error('getClipboardData fail:', err)
+        const errMsg = (err && err.errMsg) || ''
+        const errno = err && err.errno
+
+        if (errno === 112 || errMsg.indexOf('privacy agreement') >= 0) {
+          this.setData({ showPrivacyForPaste: true })
+          wx.showToast({ title: '请先在后台配置剪贴板隐私项', icon: 'none' })
+          return
+        }
+
+        if (errno === 103 || errno === 104 || errMsg.indexOf('privacy') >= 0) {
+          this.setData({ showPrivacyForPaste: true })
+          wx.showToast({ title: '需同意隐私指引后才能粘贴', icon: 'none' })
+          return
+        }
+
+        wx.showToast({
+          title: '无法读取剪贴板，请长按输入框粘贴',
+          icon: 'none',
+          duration: 2500,
+        })
+      },
     })
   },
 
@@ -72,61 +139,41 @@ Page({
       wx.showToast({ title: '请先输入文章', icon: 'none' })
       return
     }
+
+    if (typeof wx.msgSecCheck === 'function') {
+      try {
+        wx.msgSecCheck({
+          content: text.slice(0, 500),
+          success: () => {},
+          fail: () => {
+            wx.showToast({ title: '内容包含违规信息', icon: 'none' })
+            this.setData({ busy: false })
+            return
+          },
+        })
+      } catch (e) {}
+    }
+
     this.setData({ busy: true })
     const articleType = this.data.articleTypes[this.data.typeIndex].name
 
-    // 1) 先跑本地检测
-    const analysis = analyzeArticle(text, { articleType })
-    analysis.originalText = text
-
-    // 2) 异步调 SVM 服务（3秒超时回退到本地结果）
-    const svmServer = 'http://localhost:3100'
-    let svmDone = false
-    const navTimer = setTimeout(() => {
-      if (!svmDone) {
-        svmDone = true
-        doNavigate()
-      }
-    }, 3000)
-
-    const doNavigate = () => {
-      wx.setStorageSync(STORAGE_KEYS.currentAnalysis, analysis)
-      saveHistory(buildHistoryRecord({
-        type: 'detect', title: analysis.title, score: analysis.score,
-        wordCount: analysis.wordCount, scene: articleType, analysis
-      }))
-      this.setData({ busy: false })
-      wx.navigateTo({ url: '/pages/result/result' })
-    }
-
-    wx.request({
-      url: svmServer + '/detect',
-      method: 'POST',
-      data: { text },
-      header: { 'content-type': 'application/json' },
-      success: (res) => {
-        if (svmDone) return
-        svmDone = true
-        clearTimeout(navTimer)
-        if (res.data && res.data.aiScore !== undefined) {
-          const svmWeight = 0.6
-          const localWeight = 0.4
-          const svmScore = res.data.aiScore
-          analysis.score = Math.round(analysis.score * localWeight + svmScore * svmWeight)
-          analysis.svmScore = svmScore
-          analysis.svmVerdict = res.data.verdict
-          analysis.svmVotes = res.data.perModelVotes
-          analysis.svmElapsed = res.data.elapsed
-          analysis.fusionWeight = '本地' + Math.round(localWeight*100) + '% + SVM' + Math.round(svmWeight*100) + '%'
-        }
-        doNavigate()
-      },
-      fail: () => {
-        if (svmDone) return
-        svmDone = true
-        clearTimeout(navTimer)
-        doNavigate()
-      },
-    })
+    runDetection(text, { articleType })
+      .then((analysis) => {
+        wx.setStorageSync(STORAGE_KEYS.currentAnalysis, analysis)
+        saveHistory(buildHistoryRecord({
+          type: 'detect',
+          title: analysis.title,
+          score: analysis.score,
+          wordCount: analysis.wordCount,
+          scene: articleType,
+          analysis,
+        }))
+        this.setData({ busy: false })
+        wx.navigateTo({ url: '/pages/result/result' })
+      })
+      .catch(() => {
+        this.setData({ busy: false })
+        wx.showToast({ title: '检测失败，请重试', icon: 'none' })
+      })
   },
 })

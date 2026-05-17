@@ -24,7 +24,22 @@
     <!-- 使用说明 -->
     <view class="about-section">
       <text class="section-title">使用说明</text>
-      <text class="section-desc">检测结果基于本地启发式规则，用于辅助判断文章是否存在明显AI痕迹。</text>
+      <text class="section-desc">检测在您的设备本地完成，正文不会上传服务器。分数为 AI 痕迹参考指数，仅供写作辅助，不构成权威鉴定。</text>
+    </view>
+
+    <view class="menu-section">
+      <view class="menu-item" data-type="privacy" bindtap="goLegal">
+        <text class="menu-label">隐私政策</text>
+        <text class="menu-arrow">›</text>
+      </view>
+      <view class="menu-item" data-type="agreement" bindtap="goLegal">
+        <text class="menu-label">用户服务协议</text>
+        <text class="menu-arrow">›</text>
+      </view>
+      <view class="menu-item menu-danger" bindtap="onClearHistory">
+        <text class="menu-label">清空历史记录</text>
+        <text class="menu-arrow">›</text>
+      </view>
     </view>
   </view>
   <view class="bottom-spacer"></view>

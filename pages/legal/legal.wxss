@@ -1,0 +1,63 @@
+.page {
+  min-height: 100vh;
+  background: #f7f9fb;
+}
+
+.header {
+  padding: 32rpx 32rpx 24rpx;
+  background: #fff;
+  border-bottom: 2rpx solid #eef1f6;
+}
+
+.back {
+  color: #6d5cff;
+  font-size: 28rpx;
+  margin-bottom: 16rpx;
+}
+
+.title {
+  display: block;
+  font-size: 36rpx;
+  font-weight: 700;
+  color: #222;
+}
+
+.updated {
+  display: block;
+  margin-top: 8rpx;
+  font-size: 24rpx;
+  color: #8d8fa3;
+}
+
+.body {
+  height: calc(100vh - 220rpx);
+  padding: 24rpx 32rpx;
+  box-sizing: border-box;
+}
+
+.section {
+  margin-bottom: 32rpx;
+  padding: 28rpx;
+  background: #fff;
+  border-radius: 16rpx;
+}
+
+.heading {
+  display: block;
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #222;
+  margin-bottom: 16rpx;
+}
+
+.body-text {
+  display: block;
+  font-size: 26rpx;
+  line-height: 1.65;
+  color: #5a5d70;
+  white-space: pre-wrap;
+}
+
+.bottom-spacer {
+  height: 48rpx;
+}

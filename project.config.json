@@ -3,10 +3,15 @@
   "libVersion": "3.15.1",
   "packOptions": {
     "ignore": [
-      {
-        "value": "**/__tests__/**",
-        "type": "glob"
-      }
+      { "type": "glob", "value": "**/__tests__/**" },
+      { "type": "glob", "value": "tests/**" },
+      { "type": "glob", "value": "docs/**" },
+      { "type": "glob", "value": "skills/**" },
+      { "type": "glob", "value": "agents/**" },
+      { "type": "glob", "value": "scripts/**" },
+      { "type": "glob", "value": "prompts/**" },
+      { "type": "glob", "value": "node_modules/**" },
+      { "type": "glob", "value": "**/*.md" }
     ],
     "include": []
   },

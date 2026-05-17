@@ -41,9 +41,15 @@ function saveHistory(record) {
   wx.setStorageSync(STORAGE_KEYS.history, [record].concat(list).slice(0, 30))
 }
 
+function clearHistory() {
+  wx.removeStorageSync(STORAGE_KEYS.history)
+  wx.removeStorageSync(STORAGE_KEYS.currentAnalysis)
+}
+
 module.exports = {
   STORAGE_KEYS,
   buildHistoryRecord,
   readHistory,
   saveHistory,
+  clearHistory,
 }

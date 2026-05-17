@@ -1,4 +1,4 @@
-const { STORAGE_KEYS, readHistory } = require('../../utils/aiTextEngine')
+const { readHistory, clearHistory } = require('../../utils/aiTextEngine')
 
 Page({
   data: {
@@ -8,17 +8,26 @@ Page({
   onShow() {
     this.setTabBarSelected(3)
     const list = readHistory()
-    this.setData({
-      total: list.length,
+    this.setData({ total: list.length })
+  },
+
+  goLegal(event) {
+    const type = event.currentTarget.dataset.type || 'privacy'
+    wx.navigateTo({ url: `/pages/legal/legal?type=${type}` })
+  },
+
+  onClearHistory() {
+    wx.showModal({
+      title: '清空历史记录',
+      content: '将删除本机全部检测历史与最近一次结果，且无法恢复。是否继续？',
+      confirmColor: '#6D5CFF',
+      success: (res) => {
+        if (!res.confirm) return
+        clearHistory()
+        this.setData({ total: 0 })
+        wx.showToast({ title: '已清空', icon: 'success' })
+      },
     })
-  },
-
-  goBack() {
-    wx.navigateBack({ fail: () => wx.switchTab({ url: '/pages/index/index' }) })
-  },
-
-  goHome() {
-    wx.switchTab({ url: '/pages/index/index' })
   },
 
   setTabBarSelected(index) {
