@@ -132,24 +132,28 @@ Page({
       return
     }
 
-    if (typeof wx.msgSecCheck === 'function') {
-      try {
+    // 内容安全检测（阻塞式，通过审核必需）
+    const doSecCheck = () => {
+      return new Promise((resolve) => {
+        if (typeof wx.msgSecCheck !== 'function') return resolve(true)
         wx.msgSecCheck({
           content: text.slice(0, 500),
-          success: () => {},
+          success: () => resolve(true),
           fail: () => {
             wx.showToast({ title: '内容包含违规信息', icon: 'none' })
             this.setData({ busy: false })
-            return
+            resolve(false)
           },
         })
-      } catch (e) {}
+      })
     }
 
-    this.setData({ busy: true })
-    const articleType = this.data.articleTypes[this.data.typeIndex].name
+    doSecCheck().then((pass) => {
+      if (!pass) return
+      this.setData({ busy: true })
+      const articleType = this.data.articleTypes[this.data.typeIndex].name
 
-    runDetection(text, { articleType })
+      runDetection(text, { articleType })
       .then((analysis) => {
         wx.setStorageSync(STORAGE_KEYS.currentAnalysis, analysis)
         saveHistory(buildHistoryRecord({
@@ -167,5 +171,6 @@ Page({
         this.setData({ busy: false })
         wx.showToast({ title: '检测失败，请重试', icon: 'none' })
       })
+    })
   },
 })

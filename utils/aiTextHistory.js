@@ -5,7 +5,6 @@ const STORAGE_KEYS = {
   currentAnalysis: 'ai_text_lab_current_analysis',
   currentOptimize: 'ai_text_lab_current_optimize',
   history: 'ai_text_lab_history',
-  deepSeekConfig: 'ai_text_lab_deepseek_config',
 }
 
 function formatTime(timestamp) {

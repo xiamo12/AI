@@ -1,7 +1,7 @@
 <view class="page-wrap">
   <!-- 顶部紫粉渐变（固定） -->
   <view class="top-banner page-banner">
-    <view class="clear-action" bindtap="clearHistory"><text>🗑️</text><text>一键清空</text></view>
+    <view wx:if="{{records.length}}" class="clear-action" bindtap="clearHistory"><text>🗑️</text><text>一键清空</text></view>
   </view>
 
   <!-- 记录列表（可滚动，在顶部和底部之间） -->
