@@ -1,10 +1,9 @@
 <view class="page">
-  <view class="header">
-    <view class="back" bindtap="goBack">‹ 返回</view>
+  <view wx:if="{{sections.length}}" class="header">
     <text class="title">{{title}}</text>
     <text class="updated">更新日期：{{updatedAt}}</text>
   </view>
-  <scroll-view class="body" scroll-y>
+  <scroll-view wx:if="{{sections.length}}" class="body" scroll-y>
     <view wx:for="{{sections}}" wx:key="heading" class="section">
       <text class="heading">{{item.heading}}</text>
       <text class="body-text">{{item.body}}</text>
