@@ -13,6 +13,7 @@
             <text wx:if="{{item.scene === '公众号文章'}}">✎</text>
             <text wx:elif="{{item.scene === '小红书笔记'}}">✦</text>
             <text wx:elif="{{item.scene === '论文/作业'}}">□</text>
+            <text wx:elif="{{item.scene === '知乎'}}">◇</text>
             <text wx:else>◎</text>
           </view>
           <view class="record-info">

@@ -161,6 +161,25 @@ const aiFlavorPatterns = [
   { label: '看完你就懂了/学会了/明白了', regex: /看完[^。！？；;\n]{0,8}(?:就|便|自然|一定)(?:懂|学会|明白|知道)/g, weight: 5, type: '营销引导' },
   { label: '很多人不知道的是', regex: /很多人不(?:知道|了解|清楚)[^。！？；;\n]{0,4}的是/g, weight: 5, type: '悬念开头' },
   { label: '你一定要读完/一定看到最后', regex: /你(?:一定|千万)(?:要读完|要看完|看到最后|读到最后)/g, weight: 4, type: '营销引导' },
+  // ---- v3.1 公众号说理/升华 ----
+  { label: '真正…的人，都/往往', regex: /真正[^。！？；;\n]{1,24}的人[，,]?(?:都|往往|总会|通常)/g, weight: 6, type: '公众号升华' },
+  { label: '厉害/高手…往往', regex: /(?:厉害|强大|高手|牛人|优秀的人)[^。！？；;\n]{0,8}的人[，,]?往往/g, weight: 5, type: '公众号升华' },
+  { label: '说白了/归根结底', regex: /(?:说白了|归根结底|说到底|一句话总结|一句话)/g, weight: 4, type: '公众号总结' },
+  { label: '如果你也…不妨', regex: /如果你也[^。！？；;\n]{1,36}(?:不妨|可以|试着|一定要|记得)/g, weight: 5, type: '公众号号召' },
+  { label: '分享给你/转给需要的人', regex: /(?:分享给你|转给(?:身边|需要)|转发给)/g, weight: 4, type: '公众号传播' },
+
+  // ---- v3.2 知乎场景 ----
+  { label: '先说结论/结论先行', regex: /(?:先说结论|结论先行|一句话结论|直接说结论|结论就是)/g, weight: 6, type: '知乎结构' },
+  { label: '作为一名/作为一只', regex: /作为(?:一名|一个|一只)[^。！？；;\n]{1,24}(?:的|，)/g, weight: 5, type: '知乎身份' },
+  { label: '楼上/高赞都错了', regex: /(?:楼上|高赞|热评|点赞最多)[^。！？；;\n]{0,20}(?:都|普遍|往往)(?:错了|漏了|没说|没提到|不完整)/g, weight: 6, type: '知乎体' },
+  { label: '实名反对/赞同', regex: /实名(?:反对|赞同)/g, weight: 4, type: '知乎体' },
+  { label: '点赞收藏关注三连', regex: /(?:点赞|收藏|关注).{0,8}(?:三连|走一波|支持下)/g, weight: 5, type: '知乎引流' },
+  { label: '篇幅较长建议收藏', regex: /(?:篇幅|全文)(?:较长|有点长)[^。！？；;\n]{0,16}(?:建议|不妨)(?:收藏|马克|码住)/g, weight: 5, type: '知乎引流' },
+  { label: '纯干货/干货预警', regex: /(?:纯干货|干货预警|信息量(?:很大|拉满)|保姆级)/g, weight: 4, type: '知乎标签' },
+  { label: '谢邀/不请自来', regex: /(?:谢邀|不请自来|强行答|硬答)/g, weight: 3, type: '知乎开场' },
+  { label: '利益相关', regex: /利益相关[：:，,]?/g, weight: 4, type: '知乎套话' },
+  { label: '本答主/答主认为', regex: /(?:本答主|答主)(?:认为|觉得|经验|看法)/g, weight: 4, type: '知乎身份' },
+  { label: '降维打击/内卷/范式', regex: /(?:降维打击|内卷|范式转移|赛博|博弈论|信息差)/g, weight: 3, type: '知乎概念' },
 
   // ---- v2.0 小红书场景新增 ----
   { label: '谁懂啊/谁懂这种感觉', regex: /谁懂[啊吧]|谁懂这种感觉/g, weight: 4, type: '小红书感叹' },
@@ -327,9 +346,15 @@ function detectGenre(text) {
     /特征[一二三四五六七八九十\d]/g,
     /总结下来|归纳起来|主要有/,
     /一方面.*另一方面/,
+    /真正[^。！？]{1,24}的人[，,]?(?:都|往往|总会)/g,
+    /说白了|归根结底|说到底/g,
+    /(?:认知|格局|底层逻辑|长期主义)/g,
+    /先说结论|结论先行|纯干货|保姆级/,
+    /作为一名|本答主|答主认为/,
   ]
   // 叙事文标记: 个人经历、时间线、具体场景
   const narrativeSignals = [
+    /谢邀|泻药/,
     /有一次|那[天次年]|我记得|当时|后来|以前|曾经/,
     /搬家|遇见|遇到|碰到|发现|开始|坚持了/,
     /朋友|同事|同学|家人|邻居/,
@@ -371,6 +396,84 @@ function getSentenceLengthStd(sentences) {
 function getConcreteDensity(concreteHits, wordCount) {
   if (wordCount < 50) return 0
   return concreteHits / wordCount
+}
+
+/** 公众号常见抽象概念词（认知/成长类 AI 文高频） */
+const ABSTRACT_CONCEPT_RE = /(?:认知|格局|底层逻辑|颗粒度|赋能|闭环|长期主义|内耗|复盘|方法论|护城河|内核|破局|跃迁|维度|赛道|红利|钝感力|松弛感|深耕|迭代|底层|思维模型|成长型思维)/g
+
+function countAbstractConceptHits(text) {
+  const matches = text.match(ABSTRACT_CONCEPT_RE)
+  return matches ? matches.length : 0
+}
+
+/**
+ * 公众号场景：按体裁（说理/叙事）与字数分桶微调检测参数
+ */
+function applyWechatArticleTuning(params, genre, wordCount) {
+  let lengthBucket = 'medium'
+  if (wordCount < 600) lengthBucket = 'short'
+  else if (wordCount > 1600) lengthBucket = 'long'
+
+  if (lengthBucket === 'short') params.baseline = Math.max(4, params.baseline - 2)
+  if (lengthBucket === 'long') params.baseline += 1
+
+  if (genre === 'narrative') {
+    params.patternMul *= 0.72
+    params.humanMul = Math.min(1.25, params.humanMul * 1.2)
+    params.concreteThreshold = 1
+  } else if (genre === 'argumentative') {
+    params.patternMul = Math.min(2.8, params.patternMul * 1.12)
+    params.funcWordThreshold = Math.max(0.105, params.funcWordThreshold - 0.008)
+  }
+
+  return { genre, lengthBucket }
+}
+
+/** 知乎常见抽象/社区黑话（说理类回答） */
+const ZHIHU_CONCEPT_RE = /(?:降维打击|内卷|范式|信息差|博弈|赛博|底层逻辑|认知|格局|闭环|赋能|赛道|红利|护城河|方法论)/g
+
+function countZhihuConceptHits(text) {
+  const matches = text.match(ZHIHU_CONCEPT_RE)
+  return matches ? matches.length : 0
+}
+
+/** 知乎结构化排版信号（分点、目录、分割线、引流） */
+function countZhihuStructureSignals(text) {
+  let score = 0
+  if (/(?:先说结论|结论先行|一句话结论)/.test(text)) score += 2
+  if (/(?:谢邀|不请自来)/.test(text)) score += 1
+  if (/(?:目录|本文目录|以下是目录)/.test(text)) score += 2
+  const sections = (text.match(/[一二三四五六七八九十]+[、.．]/g) || []).length
+  if (sections >= 3) score += 2
+  if (sections >= 6) score += 1
+  if (/(?:\n|^)\s*\d+[.．、]\s*\S+/m.test(text)) score += 1
+  if (/(?:点赞|收藏).{0,8}(?:关注|三连)/.test(text)) score += 2
+  if (/(?:^|\n)\s*[-—]{3,}\s*$/m.test(text)) score += 1
+  if (/(?:更新[：:]|追更[：:]|补充[：:])/.test(text)) score += 1
+  return score
+}
+
+/**
+ * 知乎场景：经验叙事降模板权重，说理回答加强结构信号
+ */
+function applyZhihuArticleTuning(params, genre, wordCount) {
+  let lengthBucket = 'medium'
+  if (wordCount < 500) lengthBucket = 'short'
+  else if (wordCount > 2000) lengthBucket = 'long'
+
+  if (lengthBucket === 'short') params.baseline = Math.max(4, params.baseline - 1)
+  if (lengthBucket === 'long') params.baseline += 1
+
+  if (genre === 'narrative') {
+    params.patternMul *= 0.76
+    params.humanMul = Math.min(1.2, params.humanMul * 1.15)
+    params.concreteThreshold = 1
+  } else if (genre === 'argumentative') {
+    params.patternMul = Math.min(2.6, params.patternMul * 1.1)
+    params.funcWordThreshold = Math.max(0.108, params.funcWordThreshold - 0.006)
+  }
+
+  return { genre, lengthBucket }
 }
 
 // 四字短语密度检测
@@ -597,12 +700,25 @@ function analyzeArticle(text, options = {}) {
     '论文/作业': { baseline: 10, patternMul: 1.5, concreteThreshold: 0, humanMul: 0.8, funcWordThreshold: 0.15 },
     '公众号文章': { baseline: 6, patternMul: 2.3, concreteThreshold: 2, humanMul: 0.9, funcWordThreshold: 0.12 },
     '小红书笔记': { baseline: 4, patternMul: 1.8, concreteThreshold: 1, humanMul: 1.2, funcWordThreshold: 0.11 },
+    '知乎': { baseline: 5, patternMul: 2.1, concreteThreshold: 2, humanMul: 1.0, funcWordThreshold: 0.12 },
   }
-  const params = TYPE_PARAMS[userType] || TYPE_PARAMS['通用文本']
-  let score = params.baseline
+  const baseParams = TYPE_PARAMS[userType] || TYPE_PARAMS['通用文本']
+  const params = { ...baseParams }
 
   // --- v3.0 新: 体裁检测 & 上下文数据预计算 ---
   const genre = detectGenre(normalized)
+  let wechatMeta = null
+  let zhihuMeta = null
+  if (userType === '公众号文章') {
+    wechatMeta = applyWechatArticleTuning(params, genre, wordCount)
+  }
+  if (userType === '知乎') {
+    zhihuMeta = applyZhihuArticleTuning(params, genre, wordCount)
+  }
+  let score = params.baseline
+  let abstractHits = 0
+  let zhihuStructHits = 0
+  let zhihuConceptHits = 0
   const lenStats = getSentenceLengthStd(sentences)
   const concreteDensity = getConcreteDensity(concreteHits, wordCount)
   // "比如" 单独计算——它是举例词，不算强人类信号
@@ -617,8 +733,11 @@ function analyzeArticle(text, options = {}) {
   if (averageSentenceLength > 42) score += 4
   if (averageSentenceLength > 56) score += 3
 
-  // 3) 句长方差（burstiness proxy）
-  if (variance < 0.22 && sentences.length >= 8) score += 5
+  // 3) 句长方差（burstiness proxy）；叙事类公众号提高阈值，减少误伤
+  const varianceThreshold = (
+    (userType === '公众号文章' || userType === '知乎') && genre === 'narrative'
+  ) ? 0.18 : 0.22
+  if (variance < varianceThreshold && sentences.length >= 8) score += 5
 
   // 4) 字符去重比率
   if (uniqueRatio < 0.24 && wordCount > 400) score += 4
@@ -671,6 +790,48 @@ function analyzeArticle(text, options = {}) {
   else if (concreteHits >= 5) score -= 4
   else if (concreteHits >= 2) score -= 2
 
+  // --- v3.1 公众号：抽象概念密度 vs 具体细节 ---
+  abstractHits = countAbstractConceptHits(normalized)
+  if (userType === '公众号文章' && wordCount > 180) {
+    const abstractPer1k = abstractHits / Math.max(wordCount / 1000, 0.2)
+    if (genre === 'argumentative') {
+      if (abstractHits >= 5 && concreteHits < 4) {
+        score += Math.min(7, Math.round(abstractPer1k * 4))
+      } else if (abstractHits >= 3 && concreteHits <= params.concreteThreshold) {
+        score += 3
+      }
+    }
+    if (genre === 'narrative' && abstractHits >= 8 && effectiveHumanScore < 2 && concreteHits < 3) {
+      score += 4
+    }
+    if (genre === 'narrative' && effectiveHumanScore >= 3 && concreteHits >= 5) {
+      score -= Math.min(8, Math.round(effectiveHumanScore + concreteHits * 0.35))
+    }
+  }
+
+  // --- v3.2 知乎：结构排版 + 社区概念密度 ---
+  if (userType === '知乎') {
+    zhihuStructHits = countZhihuStructureSignals(normalized)
+    zhihuConceptHits = countZhihuConceptHits(normalized)
+    if (wordCount > 150) {
+      if (zhihuStructHits >= 4) {
+        score += Math.min(6, zhihuStructHits)
+      }
+      if (genre === 'argumentative') {
+        const conceptPer1k = zhihuConceptHits / Math.max(wordCount / 1000, 0.2)
+        if (zhihuConceptHits >= 4 && concreteHits < 4) {
+          score += Math.min(6, Math.round(conceptPer1k * 3.5))
+        }
+        if (zhihuStructHits >= 5 && concreteHits <= params.concreteThreshold) {
+          score += 3
+        }
+      }
+      if (genre === 'narrative' && effectiveHumanScore >= 2 && concreteHits >= 4) {
+        score -= Math.min(7, Math.round(effectiveHumanScore + concreteHits * 0.3))
+      }
+    }
+  }
+
   // 如果文本同时有具体细节 AND 人类信号但被误判为 AI → 减分
   const patternCount = wholeHits.details.length
   if (concreteHits > 0 && effectiveHumanScore > 0 && patternCount > 0) {
@@ -720,6 +881,7 @@ function analyzeArticle(text, options = {}) {
     '论文/作业': { patternsMul: 1.3, templateMul: 1.2 },
     '公众号文章': { patternsMul: 1.2, templateMul: 1.3 },
     '小红书笔记': { patternsMul: 1.1, templateMul: 1.4 },
+    '知乎': { patternsMul: 1.25, templateMul: 1.35 },
   }
   const sceneBoost = SCENE_BOOST[userType]
   if (sceneBoost && wholeHits.score > 0) {
@@ -889,6 +1051,21 @@ function analyzeArticle(text, options = {}) {
   if (countParallelismHits(normalized)) reasons.push('存在排比或相似句式连续堆叠')
   if (averageSentenceLength > 34) reasons.push('平均句长偏长，阅读节奏较机械')
   if (wordCount > 300 && concreteHits <= 1) reasons.push('具体事实和个人经验密度偏低')
+  if (userType === '公众号文章' && abstractHits >= 4 && concreteHits < 5) {
+    reasons.push(`抽象概念词偏多（${abstractHits}处），具体细节偏少`)
+  }
+  if (userType === '公众号文章' && wechatMeta && wechatMeta.genre === 'narrative') {
+    reasons.push('已按叙事体裁降低模板句式权重')
+  }
+  if (userType === '知乎' && zhihuStructHits >= 4) {
+    reasons.push(`知乎体结构信号偏多（${zhihuStructHits}项，如分点/结论先行/引流）`)
+  }
+  if (userType === '知乎' && zhihuConceptHits >= 4 && concreteHits < 5) {
+    reasons.push(`社区概念词偏多（${zhihuConceptHits}处），经历细节偏少`)
+  }
+  if (userType === '知乎' && zhihuMeta && zhihuMeta.genre === 'narrative') {
+    reasons.push('已按知乎经验叙事体裁降低模板权重')
+  }
   // v2.0: 补充虚词和复现率提示（仅长文本）
   if (wordCount > 150 && functionWordRatio > 0.10) reasons.push(`虚词（的、了、在、对等）占比偏高（${(functionWordRatio * 100).toFixed(1)}%）`)
   if (wordCount > 150 && trigramRepeatRatio > 0.22) reasons.push(`字符序列复现率偏高（${(trigramRepeatRatio * 100).toFixed(1)}%）`)
@@ -951,6 +1128,17 @@ function analyzeArticle(text, options = {}) {
       // v2.1 新增
       wordBigramRepeat: Number((wordBigramRepeat * 100).toFixed(1)),
       wordTrigramRepeat: Number((wordTrigramRepeat * 100).toFixed(1)),
+      ...(userType === '公众号文章' ? {
+        detectedGenre: genre,
+        wechatLengthBucket: wechatMeta ? wechatMeta.lengthBucket : 'medium',
+        abstractConceptHits: abstractHits,
+      } : {}),
+      ...(userType === '知乎' ? {
+        detectedGenre: genre,
+        zhihuLengthBucket: zhihuMeta ? zhihuMeta.lengthBucket : 'medium',
+        zhihuStructureSignals: zhihuStructHits,
+        zhihuConceptHits,
+      } : {}),
     },
     detector: localDetection ? {
       mode: 'local-js-ensemble',
@@ -998,6 +1186,11 @@ module.exports = {
   detectGenre,
   getSentenceLengthStd,
   getConcreteDensity,
+  countAbstractConceptHits,
+  applyWechatArticleTuning,
+  countZhihuStructureSignals,
+  countZhihuConceptHits,
+  applyZhihuArticleTuning,
   isHumanNotButContext,
   isConceptUsedNaturally,
 }

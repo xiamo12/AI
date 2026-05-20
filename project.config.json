@@ -11,7 +11,11 @@
       { "type": "glob", "value": "scripts/**" },
       { "type": "glob", "value": "prompts/**" },
       { "type": "glob", "value": "node_modules/**" },
-      { "type": "glob", "value": "**/*.md" }
+      { "type": "glob", "value": "ai-detector/**" },
+      { "type": "glob", "value": "**/*.md" },
+      { "type": "glob", "value": ".cursor/**" },
+      { "type": "glob", "value": ".cursorrules" },
+      { "type": "glob", "value": "CLAUDE.md" }
     ],
     "include": []
   },

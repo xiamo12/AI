@@ -92,3 +92,50 @@ describe('TC 检测基线 — 特定模式', () => {
     assert.ok(r1.score < r2.score, `含信号词的文本(${r1.score}) 应比不含的(${r2.score}) 得分低`)
   })
 })
+
+describe('公众号场景 v3.1', () => {
+  const scene = { articleType: '公众号文章' }
+
+  it('叙事体真人经历得分应低于说理体 AI 模板', () => {
+    const narrative = '去年冬天我裸辞了。那天朋友问我怕不怕，我说怕，但更怕继续耗着。后来在家歇了一个月，我开始学拍视频。有一次剪到凌晨三点，发出去只有十几个人看，我还是觉得比上班踏实。'
+    const argumentative = '真正厉害的人，不是一直很努力，而是懂得长期主义。说白了，认知决定格局，格局决定结局。归根结底，只有不断提升底层逻辑，才能在赛道上实现跃迁。'
+    const r1 = analyzeArticle(narrative, scene)
+    const r2 = analyzeArticle(argumentative, scene)
+    assert.ok(r1.score < r2.score, `叙事(${r1.score}) 应低于说理模板(${r2.score})`)
+    assert.ok(
+      r1.featureDetails.detectedGenre === 'narrative' || r1.featureDetails.detectedGenre === 'general',
+      `叙事体裁应为 narrative 或 general，实际 ${r1.featureDetails.detectedGenre}`,
+    )
+    assert.ok(
+      r2.featureDetails.detectedGenre !== 'narrative',
+      `说理模板不应被判为 narrative，实际 ${r2.featureDetails.detectedGenre}`,
+    )
+  })
+
+  it('公众号说理文应识别抽象概念偏多', () => {
+    const text = '认知升级的关键在于格局。长期主义不是口号，而是方法论。内耗、复盘、闭环、赋能，这些词背后都是底层逻辑。只有迭代思维，才能破局。'
+    const result = analyzeArticle(text, scene)
+    assert.ok(result.featureDetails.abstractConceptHits >= 5)
+    assert.ok(result.score >= 25, `说理抽象文得分 ${result.score} 应偏高`)
+  })
+})
+
+describe('知乎场景 v3.2', () => {
+  const scene = { articleType: '知乎' }
+
+  it('经验叙事回答得分应低于结构化说理 AI 回答', () => {
+    const narrative = '谢邀。三年前我从传统行业裸辞，踩过很多坑。当时存款只够撑半年，第一周几乎天天失眠。后来靠接私活熬过最难的阶段，现在回头看，最怕的不是没钱，是不敢行动。'
+    const argumentative = '先说结论：信息差才是普通人最快的破局方式。作为一名长期研究赛道的答主，我认为认知决定格局。一、建立底层逻辑。二、抓住红利窗口。三、形成闭环。点赞收藏关注，干货预警，建议马克。'
+    const r1 = analyzeArticle(narrative, scene)
+    const r2 = analyzeArticle(argumentative, scene)
+    assert.ok(r1.score < r2.score, `知乎叙事(${r1.score}) 应低于说理模板(${r2.score})`)
+    assert.ok(r2.featureDetails.zhihuStructureSignals >= 4)
+  })
+
+  it('应识别知乎体结构信号', () => {
+    const text = '先说结论：这件事没有你想的那么简单。楼上答案都漏了关键一点。一、背景。二、原因。三、建议。全文篇幅较长，建议收藏。'
+    const result = analyzeArticle(text, scene)
+    assert.ok(result.featureDetails.zhihuStructureSignals >= 3)
+    assert.ok(result.score >= 28, `知乎结构文得分 ${result.score} 应偏高`)
+  })
+})

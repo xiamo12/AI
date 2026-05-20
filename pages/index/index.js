@@ -5,8 +5,8 @@ const articleTypes = [
   { icon: '□', name: '论文/作业', nameShort: '论文/毕业' },
   { icon: '✎', name: '公众号文章', nameShort: '公众号' },
   { icon: '✦', name: '小红书笔记', nameShort: '小红书' },
+  { icon: '◇', name: '知乎', nameShort: '知乎' },
   { icon: '▶', name: '口播脚本', nameShort: '口播' },
-  { icon: '▣', name: '职场文档', nameShort: '职场' },
 ]
 
 Page({
