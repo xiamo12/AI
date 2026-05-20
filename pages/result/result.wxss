@@ -278,7 +278,7 @@
 
 /* ===== AI痕迹分析列表 ===== */
 .analysis-section {
-  margin: 10px 32rpx 100rpx;
+  margin: 10px 32rpx 126rpx;
   flex: 1;
   min-height: 0;
   overflow: hidden;
@@ -293,13 +293,9 @@
   margin-bottom: 250rpx;
 }
 
-.analysis-scroll-wrap {
+.analysis-scroll {
   flex: 1;
   min-height: 0;
-  overflow: hidden;
-}
-.analysis-scroll {
-  height: 100%;
   overflow-y: scroll;
   padding-bottom: 20rpx;
 }

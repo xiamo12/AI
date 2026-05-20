@@ -62,26 +62,24 @@
     <!-- AI痕迹分析列表 -->
     <view class="analysis-section {{displayIssues.length ? '' : 'empty'}}">
       <view class="section-title">AI痕迹分析 <text class="count">共{{displayIssues.length}}项</text></view>
-      <view class="analysis-scroll-wrap">
-        <scroll-view class="analysis-scroll" scroll-y>
-          <block wx:if="{{displayIssues.length}}">
-            <view wx:for="{{displayIssues}}" wx:key="index" class="issue-item">
-              <view class="issue-icon" style="background: {{item.bgColor}}">
-                <text class="issue-num">{{index + 1}}</text>
-              </view>
-              <view class="issue-content">
-                <view class="issue-name">{{item.title}}</view>
-                <view class="issue-detail">{{item.desc}}</view>
-              </view>
-              <view class="issue-tag {{item.levelClass}}">{{item.level}}</view>
+      <scroll-view class="analysis-scroll" scroll-y>
+        <block wx:if="{{displayIssues.length}}">
+          <view wx:for="{{displayIssues}}" wx:key="index" class="issue-item">
+            <view class="issue-icon" style="background: {{item.bgColor}}">
+              <text class="issue-num">{{index + 1}}</text>
             </view>
-          </block>
-          <view wx:else class="empty-issues">
-            <text class="empty-issues-icon">✓</text>
-            <text class="empty-issues-text">未检测到明显 AI 痕迹特征</text>
+            <view class="issue-content">
+              <view class="issue-name">{{item.title}}</view>
+              <view class="issue-detail">{{item.desc}}</view>
+            </view>
+            <view class="issue-tag {{item.levelClass}}">{{item.level}}</view>
           </view>
-        </scroll-view>
-      </view>
+        </block>
+        <view wx:else class="empty-issues">
+          <text class="empty-issues-icon">✓</text>
+          <text class="empty-issues-text">未检测到明显 AI 痕迹特征</text>
+        </view>
+      </scroll-view>
     </view>
 
     <!-- 底部操作按钮 -->
