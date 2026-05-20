@@ -44,7 +44,7 @@
 
   <!-- 固定底部检测按钮 -->
   <view class="bottom-fixed-bar">
-    <button class="detect-btn" loading="{{busy}}" bindtap="detectText">
+    <button class="detect-btn {{busy ? 'loading' : ''}}" loading="{{busy}}" bindtap="detectText">
       <text wx:if="{{!busy}}">开始检测</text>
       <text wx:else>检测中…</text>
     </button>

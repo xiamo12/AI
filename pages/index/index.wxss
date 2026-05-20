@@ -345,7 +345,8 @@
   line-height: 100rpx;
   text-align: center;
 }
-.detect-btn:active {
+.detect-btn:active,
+.detect-btn.loading {
   transform: translateY(2rpx);
   opacity: 0.9;
 }

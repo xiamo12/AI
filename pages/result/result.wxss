@@ -209,6 +209,31 @@
   color: #F59E0B;
 }
 
+/* ===== AI痕迹分析列表空状态 ===== */
+.empty-issues {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80rpx 0;
+}
+.empty-issues-icon {
+  width: 80rpx;
+  height: 80rpx;
+  border-radius: 50%;
+  background: #E8F5E9;
+  color: #4CAF50;
+  font-size: 40rpx;
+  font-weight: 700;
+  text-align: center;
+  line-height: 80rpx;
+}
+.empty-issues-text {
+  margin-top: 16rpx;
+  font-size: 26rpx;
+  color: #9CA0B4;
+}
+
 /* ===== 底部操作按钮（固定窗口底部） ===== */
 .btn-area {
   position: fixed;
@@ -253,19 +278,30 @@
 
 /* ===== AI痕迹分析列表 ===== */
 .analysis-section {
-  margin: 10px 32rpx 0;
+  margin: 10px 32rpx 100rpx;
   flex: 1;
   min-height: 0;
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  padding-bottom: 16rpx;
+  background: #FFFFFF;
+  border-radius: 28rpx;
+  box-shadow: 0 8rpx 28rpx rgba(39, 52, 125, 0.08);
+  padding: 28rpx 28rpx 20rpx;
 }
-.analysis-scroll {
+.analysis-section.empty {
+  margin-bottom: 250rpx;
+}
+
+.analysis-scroll-wrap {
   flex: 1;
   min-height: 0;
+  overflow: hidden;
+}
+.analysis-scroll {
+  height: 100%;
   overflow-y: scroll;
-  padding-bottom: 10rpx;
+  padding-bottom: 20rpx;
 }
 .section-title {
   display: flex;
@@ -273,7 +309,8 @@
   font-size: 30rpx;
   font-weight: 700;
   color: #1A1C3D;
-  margin-bottom: 24rpx;
+  margin-bottom: 20rpx;
+  flex-shrink: 0;
 }
 .section-title .count {
   font-size: 24rpx;
@@ -286,11 +323,13 @@
 .issue-item {
   display: flex;
   align-items: center;
-  background: #FFFFFF;
-  margin-bottom: 24rpx;
-  padding: 24rpx;
-  border-radius: 30rpx;
-  box-shadow: 0 4rpx 16rpx rgba(106, 90, 224, 0.06);
+  margin-bottom: 16rpx;
+  padding: 20rpx 20rpx 20rpx 24rpx;
+  background: #F7F8FC;
+  border-radius: 16rpx;
+  height: 112rpx;
+  box-sizing: border-box;
+  border-left: 6rpx solid transparent;
 }
 .issue-item:last-child {
   margin-bottom: 0;

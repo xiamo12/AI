@@ -66,10 +66,12 @@ Page({
     const sourceList = analysis.sourceAnalysis || []
     const displayIssues = sourceList.map((item, idx) => {
       const bgColorMap = { high: '#FFF0ED', medium: '#FFFBEB', low: '#F0FDF4' }
+      const borderColorMap = { high: '#EF4444', medium: '#F59E0B', low: '#22C55E' }
       const levelMap = { high: '高', medium: '中', low: '低' }
       return {
         ...item,
         bgColor: bgColorMap[item.riskClass] || '#F0FDF4',
+        borderColor: borderColorMap[item.riskClass] || '#22C55E',
         level: levelMap[item.riskClass] || '低',
         levelClass: item.riskClass || 'low',
       }
@@ -109,10 +111,12 @@ Page({
       wordCount: analysis.wordCount, scene: analysis.articleType, analysis,
     }))
     wx.hideLoading()
+    wx.setStorageSync('reset_busy', Date.now())
     wx.switchTab({ url: '/pages/index/index' })
   },
 
   goBack() {
+    wx.setStorageSync('reset_busy', Date.now())
     wx.navigateBack({ fail: () => wx.switchTab({ url: '/pages/index/index' }) })
   },
 

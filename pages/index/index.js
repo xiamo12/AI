@@ -21,6 +21,12 @@ Page({
   },
 
   onShow() {
+    // 从结果页返回时重置按钮状态
+    const resetTime = wx.getStorageSync('reset_busy')
+    if (resetTime) {
+      wx.removeStorageSync('reset_busy')
+    }
+    this.setData({ busy: false })
     this.setTabBarSelected(0)
     const presetScene = wx.getStorageSync('preset_scene')
     if (presetScene) {
@@ -132,6 +138,9 @@ Page({
       return
     }
 
+    // 立即进入 loading 状态，按钮保持按下的样式
+    this.setData({ busy: true })
+
     // 内容安全检测（阻塞式，通过审核必需）
     const doSecCheck = () => {
       return new Promise((resolve) => {
@@ -150,7 +159,6 @@ Page({
 
     doSecCheck().then((pass) => {
       if (!pass) return
-      this.setData({ busy: true })
       const articleType = this.data.articleTypes[this.data.typeIndex].name
 
       runDetection(text, { articleType })
@@ -164,7 +172,7 @@ Page({
           scene: articleType,
           analysis,
         }))
-        this.setData({ busy: false })
+        // 不重置 busy，页面直接跳转，按钮保持 loading 状态直至页面消失
         wx.navigateTo({ url: '/pages/result/result' })
       })
       .catch(() => {
