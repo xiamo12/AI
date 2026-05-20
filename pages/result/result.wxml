@@ -6,7 +6,7 @@
   </view>
 
   <!-- 主要内容 -->
-  <block wx:elif="{{analysis}}">
+  <view wx:elif="{{analysis}}" class="content-wrap">
     <!-- 返回按钮 -->
     <view class="back-btn" style="top: calc({{statusBarHeight}}px + 12px);" bindtap="goBack">‹</view>
 
@@ -35,23 +35,6 @@
       </view>
     </view>
 
-    <!-- AI痕迹分析列表 -->
-    <view class="analysis-section">
-      <view class="section-title">AI痕迹分析 <text class="count">共{{displayIssues.length}}项</text></view>
-      <scroll-view class="analysis-scroll" scroll-y>
-        <view wx:for="{{displayIssues}}" wx:key="index" class="issue-item">
-          <view class="issue-icon" style="background: {{item.bgColor}}">
-            <text class="issue-num">{{index + 1}}</text>
-          </view>
-          <view class="issue-content">
-            <view class="issue-name">{{item.title}}</view>
-            <view class="issue-detail">{{item.desc}}</view>
-          </view>
-          <view class="issue-tag {{item.levelClass}}">{{item.level}}</view>
-        </view>
-      </scroll-view>
-    </view>
-
     <!-- v2.0 语义一致性卡片 -->
     <view wx:if="{{analysis.semanticConsistency}}" class="consistency-section">
       <view class="section-title">
@@ -76,6 +59,23 @@
       </view>
     </view>
 
+    <!-- AI痕迹分析列表 -->
+    <view class="analysis-section">
+      <view class="section-title">AI痕迹分析 <text class="count">共{{displayIssues.length}}项</text></view>
+      <scroll-view class="analysis-scroll" scroll-y>
+        <view wx:for="{{displayIssues}}" wx:key="index" class="issue-item">
+          <view class="issue-icon" style="background: {{item.bgColor}}">
+            <text class="issue-num">{{index + 1}}</text>
+          </view>
+          <view class="issue-content">
+            <view class="issue-name">{{item.title}}</view>
+            <view class="issue-detail">{{item.desc}}</view>
+          </view>
+          <view class="issue-tag {{item.levelClass}}">{{item.level}}</view>
+        </view>
+      </scroll-view>
+    </view>
+
     <!-- 底部操作按钮 -->
     <view class="btn-area">
       <button class="action-btn action-btn-primary" bindtap="goIssues">查看问题句子</button>
@@ -85,7 +85,7 @@
     <!-- 底部 tab 切换 -->
     <tab-bar id="tab-bar"></tab-bar>
 
-    </block>
+    </view>
 
   <!-- 空状态 -->
   <view wx:else class="empty-state">

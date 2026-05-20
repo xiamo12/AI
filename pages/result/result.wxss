@@ -31,9 +31,19 @@
   font-size: 26rpx;
 }
 
+/* ===== 主要内容容器（撑满剩余空间） ===== */
+.content-wrap {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
 /* ===== 顶部背景与机器人 ===== */
 .header-bg {
   height: 360rpx;
+  flex-shrink: 0;
   background: linear-gradient(135deg, #6A5AE0 0%, #D83AB3 100%);
   position: relative;
   border-radius: 0 0 50rpx 50rpx;
@@ -52,7 +62,8 @@
 
 /* ===== 分数展示卡片（玻璃拟态） ===== */
 .score-card {
-  margin: 0rpx 40rpx 0;
+  margin: -160rpx 40rpx 0;
+  flex-shrink: 0;
   background: rgba(255, 255, 255, 0.92);
   border-radius: 40rpx;
   padding: 60rpx 0;
@@ -100,6 +111,7 @@
 /* ===== 刻度进度条 ===== */
 .scale-container {
   margin: 28rpx 40rpx 0;
+  flex-shrink: 0;
 }
 .scale-bar {
   height: 12rpx;
@@ -164,7 +176,7 @@
 /* ===== v2.0 语义一致性卡片 ===== */
 .consistency-section {
   margin: 20rpx 32rpx 0;
-  padding-bottom: 165rpx;
+  flex-shrink: 0;
 }
 .consistency-grid {
   display: flex;
@@ -242,11 +254,16 @@
 /* ===== AI痕迹分析列表 ===== */
 .analysis-section {
   margin: 10px 32rpx 0;
+  flex: 1;
+  min-height: 0;
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
   padding-bottom: 16rpx;
 }
 .analysis-scroll {
-  max-height: calc(100vh - 760rpx);
+  flex: 1;
+  min-height: 0;
   overflow-y: scroll;
   padding-bottom: 10rpx;
 }
